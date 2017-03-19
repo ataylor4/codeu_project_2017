@@ -26,14 +26,13 @@ public class BTree<T> {
     private Object[] elems;
     private BTreeInformation<T> treeInformation;
 
-    private BTree(BTreeInformation<T> treeInformation) {
-        this.treeInformation = treeInformation;
-        parent = null;
-
-        children = new BTree[treeInformation.maxNumPointers];
-        elems = new Object[treeInformation.maxNumPointers - 1];
-    }
-
+    /**
+     * Constructor for a B-Tree
+     * @param b: The maximum amount of pointers any node of the tree can have.
+     * @param comparator: The compare function that should be use to order elements
+     *                  within the tree. See
+     *                  https://docs.oracle.com/javase/8/docs/api/java/util/Comparator.html.
+     */
     public BTree(int b, Comparator<? super T> comparator) {
         this(new BTreeInformation<>(b, comparator));
         if (b < 2) {
@@ -42,6 +41,20 @@ public class BTree<T> {
         }
     }
 
+    private BTree(BTreeInformation<T> treeInformation) {
+        this.treeInformation = treeInformation;
+        parent = null;
+
+        children = new BTree[treeInformation.maxNumPointers];
+        elems = new Object[treeInformation.maxNumPointers - 1];
+    }
+
+    /**
+     * Search the tree for the given element. Returns the element if found.
+     * @param elem: The element to search for.
+     *            Note that only the field(s) used by the comparator must be initialized
+     * @return the element that is sought after, or null if it is not within the tree
+     */
     public T contains(T elem) {
         BTree<T> curr = this;
         while (curr != null) {
@@ -56,6 +69,11 @@ public class BTree<T> {
         return null;
     }
 
+    /**
+     * Inserts the given element into the tree, assuming it is not a duplicate.
+     * @param elem: The element to add into the tree
+     * @return The root of the tree after the insertion.
+     */
     public BTree<T> add(T elem) {
         BTree<T> curr = this;
         while (true) {
@@ -70,6 +88,18 @@ public class BTree<T> {
             }
             curr = curr.children[index];
         }
+    }
+
+    /**
+     * Returns a string representation of the tree.
+     * @return A string with all elements in the tree in sorted order,
+     * with spaces between the elements
+     */
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        printTree(this, builder);
+        return builder.deleteCharAt(builder.length() - 1).toString();
     }
 
     private BTree<T> insertIntoNode(BTree<T> toInsert, T elem, BTree<T> child, BTree<T> prev) {
@@ -153,13 +183,6 @@ public class BTree<T> {
             }
         }
         return elems.length;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        printTree(this, builder);
-        return builder.deleteCharAt(builder.length() - 1).toString();
     }
 
     private StringBuilder printTree(BTree<T> curr, StringBuilder builder) {
