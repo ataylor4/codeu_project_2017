@@ -189,17 +189,17 @@ public class BTree<T> {
         if (curr == null) {
             return builder;
         }
-        int i;
-        for (i = 0; i < curr.elems.length; i++) {
-            printTree(curr.children[i], builder);
-            if (curr.elems[i] == null) {
-                i++;
+        int elemIndex;
+        for (elemIndex = 0; elemIndex < curr.elems.length; elemIndex++) {
+            printTree(curr.children[elemIndex], builder);
+            if (curr.elems[elemIndex] == null) {
+                elemIndex++;
                 break;
             }
-            builder.append(curr.elems[i]);
+            builder.append(curr.elems[elemIndex]);
             builder.append(" ");
         }
-        printTree(curr.children[i], builder);
+        printTree(curr.children[elemIndex], builder);
         return builder;
     }
 
