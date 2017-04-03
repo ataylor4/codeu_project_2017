@@ -116,6 +116,13 @@ public final class Model {
     messageByText.insert(message.content, message);
   }
 
+  // attempt to delete message
+  /*public void remove(Message message) {
+    messageById.remove(message.id);
+    messageByTime.remove(message.creation);
+    messageByText.remove(message.content);
+  }*/
+
   public StoreAccessor<Uuid, Message> messageById() {
     return messageById;
   }

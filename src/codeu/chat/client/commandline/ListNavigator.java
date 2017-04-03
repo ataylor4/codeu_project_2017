@@ -72,7 +72,7 @@ public final class ListNavigator<T extends ListViewable> {
     }
   }
 
-  // Get the selectes object from the chooser.
+  // Get the selected object from the chooser.
   // Should be called after chooseFromList returns true (otherwise returns null).
   public T getSelectedChoice() {
     return (hasInt) ? selection.get(intValue - 1) : null;
