@@ -100,3 +100,17 @@ Apr 03, 2017 11:43:47 AM codeu.chat.client.Controller newUser
 INFO: newUser: Response completed.
 Apr 03, 2017 11:43:47 AM codeu.chat.client.ClientUser addUser
 INFO: New user complete, Name= "robert" UUID="[UUID:100.101.1105688938]" security=10000$8d58dedbfbf5d7dc901bd011f2eb64cb$b211f5eacb3fad744555fd79f81f05889c501491071a2ae16dc167fbd752ca7d$Which city did you meet your spouse?$10000$41f5e5cb1b4f021a411f3d34ad7cb71f$b8aa0b49c8488371220c8fcea1e4b38bb5b31f7467332c5cc3eec13175127921
+Apr 03, 2017 11:53:06 AM codeu.chat.ClientMain main
+INFO: ============================= START OF LOG =============================
+Apr 03, 2017 11:53:06 AM codeu.chat.ClientMain main
+INFO: Starting chat client...
+Apr 03, 2017 11:53:06 AM codeu.chat.ClientMain main
+INFO: Creating client...
+Apr 03, 2017 11:53:06 AM codeu.chat.ClientMain main
+INFO: Created client
+Apr 03, 2017 11:53:17 AM codeu.chat.client.Controller newUser
+INFO: newUser: Request completed.
+Apr 03, 2017 11:53:17 AM codeu.chat.client.Controller newUser
+INFO: newUser: Response completed.
+Apr 03, 2017 11:53:17 AM codeu.chat.client.ClientUser addUser
+INFO: New user complete, Name= "tom" UUID="[UUID:100.101.869331851]" security=10000$b80e8f87826d2b0849238fd53ca630d3$2078850b5fb8e7c9f6314dbaa0e4659d04495aaadc351e923adbdbbc64ac1304$What is the name of your elementary school?$10000$9c5214684bae09ce815d4c73abceaed1$1a4df9302d590ce1c3ac281b663492e0f23861ea33248051281a86cb44632348

@@ -144,7 +144,7 @@ public class Password {
                         System.out.println("Let's create you new login password:");
                         String newPassword = promptForPassword(name);
                         //delete old passwords when Store implements delete
-                        createPassword(name, newPassword);
+                        ClientUser.usersByName.first(name).security=createPassword(name, newPassword);
                         System.out.println("Password changed. Try signing in again");
                     } else
                         System.out.println("Error: Unable to recover password");

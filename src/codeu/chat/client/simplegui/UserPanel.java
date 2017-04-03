@@ -317,7 +317,8 @@ public final class UserPanel extends JPanel {
                 if (pass_one.equals(pass_two) && (userName != null && userName.length() > 0)) {
                     JOptionPane.showMessageDialog(panel, Password.passwordStrength(pass_one), "PASSWORD STRENGTH", JOptionPane.INFORMATION_MESSAGE);
                     String securityDetails=pass_one + "$" + question + "$" + answer;
-                    clientContext.user.addUser(userName, securityDetails);
+                    if(mode==0) clientContext.user.addUser(userName, securityDetails);
+                    if(mode==1) ClientUser.usersByName.first(userName).security=Password.createPassword(userName, securityDetails);//overwrite existing
                     UserPanel.this.getAllUsers(listModel);
                     break;
                 } else {
@@ -372,6 +373,7 @@ public final class UserPanel extends JPanel {
             String[] securityDetails=ClientUser.passwordsDB.first(data).split("\\$");
             if (securityDetails[3].equals(securityQuestion)){//questions match
                 if(Password.passedsecurityTestGUI(data, answer)) {
+                    //delete old password
                     createPasswordInputDialog(listModel, 1);
                     JOptionPane.showMessageDialog(panel, "Password Successfully Changed!", "PASSWORD STRENGTH", JOptionPane.INFORMATION_MESSAGE);
                 }
