@@ -53,7 +53,6 @@ public final class ClientUser {
     } else {
 
       clean=userName.matches("[A-Za-z0-9_ @]+");
-      // TODO: check for invalid characters
 
     }
     return clean;
@@ -72,10 +71,12 @@ public final class ClientUser {
 
     final User prev = current;
     final User temp = usersByName.first(name);
-    if (( name!=null && mode==1)|| (name != null && Password.authenticateUserCommandline(name, temp) && mode==0)) {
-      final User newCurrent = usersByName.first(name);
-      if (newCurrent != null) {
-        current = newCurrent;
+    if(name!=null) {
+      if (mode == 1 || (Password.authenticateUserCommandline(name, temp) && mode == 0)) {
+        final User newCurrent = usersByName.first(name);
+        if (newCurrent != null) {
+          current = newCurrent;
+        }
       }
     }
     return (prev != current);
@@ -93,14 +94,13 @@ public final class ClientUser {
 
   public void  addUser(String name, String password) {
     final boolean validInputs = isValidName(name);
-    //System.out.println(Password.createPassword(name, password));
     final User user = (validInputs) ? controller.newUser(name, Password.createPassword(name, password)) : null;
 
     if (user == null) {
       System.out.format("Error: user not created - %s.\n",
               (validInputs) ? "server failure" : "bad input value");
     } else {
-      LOG.info("New user complete, Name= \"%s\" UUID=\"%s\" security=%s", user.name, user.id, user.security);
+      LOG.info("New user complete, Name= \"%s\" UUID=%s", user.name, user.id, user.security);
       updateUsers();
     }
   }

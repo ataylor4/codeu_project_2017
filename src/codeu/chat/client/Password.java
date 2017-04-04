@@ -8,20 +8,16 @@ import java.util.Map;
 import java.io.*;
 import java.security.SecureRandom;
 import java.util.Random;
-import java.security.*;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
-import java.util.Base64;
 import javax.crypto.*;
 import java.security.spec.InvalidKeySpecException;
-import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Scanner;
 import java.math.BigInteger;
 import java.lang.*;
 
-import codeu.chat.client.ClientUser;
-import codeu.chat.util.store.Store;
+
 import codeu.chat.common.User;
 
 public class Password {
@@ -30,7 +26,6 @@ public class Password {
     private static final int DESIRED_KEYLEN = 256;
     private static final int MAX_TRIALS=3;
     private static final Random RANDOM = new SecureRandom();
-    private static Map<String, String> DB = new HashMap<String, String>();
 
     /*
     This method interacts with the user ro collect all security details via commandline
@@ -46,8 +41,7 @@ public class Password {
             password = validPass ? password : null;
             if (password == null) {
                 System.out.format("Password not created - %s.\n", validPass ? "server failure" : "Passwords don't match. Try Again!");
-            }
-            else {
+            } else {
                 System.out.println("Password Strength: "+ passwordStrength(password));
                 return password + "$" +collectPasswordRecoveryInfo(name);
             }
@@ -56,6 +50,9 @@ public class Password {
 /*
 * this method calls methods to encrypt the password and the security question answer
 * it stores all the encrypted security question in a string separated by $
+* securityDetails[0]=password
+* securityDetails[1]=security question
+* securityDetails[2]=security question answer
 * */
     public static String createPassword(String user, String password){
             try {
@@ -75,7 +72,7 @@ public class Password {
     }
 
 /*
-* This methos interacts with the user on cmd to read the entered password
+* This method interacts with the user on cmd to read the entered password
 * it calls respective methods to validate the password
 * */
 
@@ -100,7 +97,8 @@ public class Password {
         }
         catch (NoSuchAlgorithmException e) {
             System.out.println(e.getMessage());
-        } catch (InvalidKeySpecException e) {
+        }
+        catch (InvalidKeySpecException e) {
             System.out.println(e.getMessage());
         }
         return correctPass;
@@ -116,7 +114,8 @@ public class Password {
         }
         catch (NoSuchAlgorithmException e) {
             System.out.println(e.getMessage());
-        } catch (InvalidKeySpecException e) {
+        }
+        catch (InvalidKeySpecException e) {
             System.out.println(e.getMessage());
         }
         return isCorrect;
@@ -131,8 +130,8 @@ public class Password {
     private static void changePassword(String name) {
         System.out.println("Forgotten password? Y N");
         Scanner input = new Scanner(System.in);
-        String choice=input.nextLine();
-        if (choice.equals("Y") || choice.equals("y")) {
+        String startsWith=input.nextLine();
+        if (startsWith.equals("Y") || startsWith.equals("y")) {
             String[] recoveryDetails=collectPasswordRecoveryInfo(name).split("\\$");
             String[] securityDetails=ClientUser.usersByName.first(name).security.split("\\$");
             if (securityDetails[3].equals(recoveryDetails[0])) {//security question matches
@@ -147,7 +146,8 @@ public class Password {
                 }
                 catch (NoSuchAlgorithmException e) {
                     System.out.println(e.getMessage());
-                } catch (InvalidKeySpecException e) {
+                }
+                catch (InvalidKeySpecException e) {
                     System.out.println(e.getMessage());
                 }
             }
@@ -260,7 +260,7 @@ public class Password {
     * */
     public static final String passwordStrength(String password){
 
-        //a very strong password has special, lowercase, uppercase, digit characters, now hitespace and has length of at least 8
+        //a very strong password has special, lowercase, uppercase, digit characters, no whitespace and has length of at least 8
         if(password.matches("(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}")) return "Very Strong!";
 
         //a strong password has a lowercase, uppercase and either a digit or special character and has at least 6 characters
