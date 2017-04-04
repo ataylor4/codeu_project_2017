@@ -6,7 +6,7 @@ import java.util.Comparator;
 @SuppressWarnings("unchecked")
 public class BTreeStore<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
     private BTreeStore<KEY, VALUE> parent;
-    private BTreeStore<KEY, VALUE>[] children;
+    private Object[] children;
     private Object[] keys;
     private Object[] values;
     private BTreeInformation<KEY> treeInformation;
@@ -32,7 +32,7 @@ public class BTreeStore<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
         this.treeInformation = treeInformation;
         parent = null;
 
-        children = new BTreeStore[treeInformation.maxNumPointers];
+        children = new Object[treeInformation.maxNumPointers];
         keys = new Object[treeInformation.maxNumPointers - 1];
         values = new Object[treeInformation.maxNumPointers - 1];
         numElems = 0;
@@ -56,7 +56,7 @@ public class BTreeStore<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
                 && (treeInformation.comparator.compare(min, (KEY) curr.keys[pointerIndex]) == 0
                     || (curr.children[pointerIndex] == null
                         && treeInformation.comparator.compare(max, (KEY) curr.keys[pointerIndex]) > 0))) {
-                BTreeStore<KEY, VALUE> relevantChild = curr.children[pointerIndex];
+                BTreeStore<KEY, VALUE> relevantChild = (BTreeStore<KEY, VALUE>) curr.children[pointerIndex];
                 if (relevantChild != null) {
                     BTreeStore<KEY, VALUE> maximumTree = maximumTree(relevantChild);
                     if (treeInformation.comparator
@@ -68,9 +68,9 @@ public class BTreeStore<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
                 }
             }
             if (pointerIndex < curr.numElems) {
-                currentCeiling = new BTreeIterable(curr, pointerIndex, max, treeInformation.comparator);
+                currentCeiling = new BTreeIterable<>(curr, pointerIndex, max, treeInformation.comparator);
             }
-            curr = curr.children[pointerIndex];
+            curr = (BTreeStore<KEY, VALUE>) curr.children[pointerIndex];
         }
         return currentCeiling;
     }
@@ -115,7 +115,7 @@ public class BTreeStore<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
                 BTreeStore<KEY, VALUE> newRoot = insertIntoNode(curr, key, value, null, curr);
                 return newRoot == null ? this : newRoot;
             }
-            curr = curr.children[index];
+            curr = (BTreeStore<KEY, VALUE>) curr.children[index];
         }
     }
 
@@ -161,7 +161,7 @@ public class BTreeStore<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
     }
 
     protected BTreeStore<KEY, VALUE> getChild(int index) {
-        return children[index];
+        return (BTreeStore<KEY, VALUE>) children[index];
     }
 
     protected int getNumElems() {
@@ -208,7 +208,7 @@ public class BTreeStore<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
             if (toInsert.children[0] != null) {
                 for (int i = adjustedCenter + 1; i < toInsert.children.length; i++) {
                     newPointer.children[i - (adjustedCenter + 1)] = toInsert.children[i];
-                    toInsert.children[i].parent = newPointer;
+                    ((BTreeStore<KEY, VALUE>)toInsert.children[i]).parent = newPointer;
                     toInsert.children[i] = null;
                 }
             }
@@ -272,7 +272,8 @@ public class BTreeStore<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
         // deleting from an interior node involves finding the predecessor element and moving it into the interior node
         // then recursing on the modified leaf node
         if (deletingFrom.children[indexToDelete] != null) {
-            BTreeStore<KEY, VALUE> replacement = maximumTree(deletingFrom.children[indexToDelete]);
+            BTreeStore<KEY, VALUE> replacement
+                = maximumTree((BTreeStore<KEY, VALUE>) deletingFrom.children[indexToDelete]);
             deletingFrom.keys[indexToDelete] = replacement.keys[replacement.numElems - 1];
             deletingFrom.values[indexToDelete] = replacement.values[replacement.numElems - 1];
             return removeFromTree(replacement, replacement.numElems - 1);
@@ -308,8 +309,9 @@ public class BTreeStore<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
 
         //right sibling exists and has enough pointers
         if (parentIndex < parent.numElems
-            && parent.children[parentIndex + 1].numElems >= treeInformation.maxNumPointers / 2) {
-            BTreeStore<KEY, VALUE> rightSibling = parent.children[parentIndex + 1];
+            && ((BTreeStore<KEY, VALUE>) parent.children[parentIndex + 1]).numElems
+                >= treeInformation.maxNumPointers / 2) {
+            BTreeStore<KEY, VALUE> rightSibling = (BTreeStore<KEY, VALUE>) parent.children[parentIndex + 1];
             deletingFrom.keys[deletingFrom.numElems] = parent.keys[parentIndex];
             deletingFrom.values[deletingFrom.numElems] = parent.values[parentIndex];
             deletingFrom.children[deletingFrom.numElems + 1] = rightSibling.children[0];
@@ -326,8 +328,8 @@ public class BTreeStore<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
         }
         //left sibling exists and has enough pointers
         if (parentIndex > 0 &&
-            parent.children[parentIndex - 1].numElems >= treeInformation.maxNumPointers / 2) {
-            BTreeStore<KEY, VALUE> leftSibling = parent.children[parentIndex - 1];
+            ((BTreeStore<KEY, VALUE>)parent.children[parentIndex - 1]).numElems >= treeInformation.maxNumPointers / 2) {
+            BTreeStore<KEY, VALUE> leftSibling = (BTreeStore<KEY, VALUE>) parent.children[parentIndex - 1];
             insertIntoArray(deletingFrom.keys, parent.keys[parentIndex - 1], 0);
             insertIntoArray(deletingFrom.values, parent.values[parentIndex - 1], 0);
             insertIntoArray(deletingFrom.children, leftSibling.children[leftSibling.numElems], 0);
@@ -344,8 +346,8 @@ public class BTreeStore<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
         }
         //neither has enough and we merge with left sibling
         if (parentIndex > 0) {
-            deletingFrom = mergeNodes(parent.children[parentIndex - 1], (KEY) parent.keys[parentIndex - 1],
-                (VALUE) parent.values[parentIndex - 1], deletingFrom);
+            deletingFrom = mergeNodes((BTreeStore<KEY, VALUE>) parent.children[parentIndex - 1],
+                (KEY) parent.keys[parentIndex - 1], (VALUE) parent.values[parentIndex - 1], deletingFrom);
             if (parent.parent == null && parent.numElems == 1) {
                 deletingFrom.parent = null;
                 return deletingFrom;
@@ -354,7 +356,7 @@ public class BTreeStore<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
         }
         //neither has enough and we merge with the right sibling
         deletingFrom = mergeNodes(deletingFrom, (KEY) parent.keys[parentIndex],
-            (VALUE) parent.values[parentIndex], parent.children[parentIndex + 1]);
+            (VALUE) parent.values[parentIndex], (BTreeStore<KEY, VALUE>) parent.children[parentIndex + 1]);
         if (parent.parent == null && parent.numElems == 1) {
             deletingFrom.parent = null;
             return deletingFrom;
@@ -407,7 +409,7 @@ public class BTreeStore<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
     protected BTreeStore<KEY, VALUE> minimumTree(BTreeStore<KEY, VALUE> tree) {
         BTreeStore<KEY, VALUE> result = tree;
         while (result.children[0] != null) {
-            result = result.children[0];
+            result = (BTreeStore<KEY, VALUE>) result.children[0];
         }
         return result;
     }
@@ -416,7 +418,7 @@ public class BTreeStore<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
     protected BTreeStore<KEY, VALUE> maximumTree(BTreeStore<KEY, VALUE> tree) {
         BTreeStore<KEY, VALUE> result = tree;
         while (result.children[result.numElems] != null) {
-            result = result.children[result.numElems];
+            result = (BTreeStore<KEY, VALUE>) result.children[result.numElems];
         }
         return result;
     }
@@ -428,7 +430,7 @@ public class BTreeStore<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
         }
         int elemIndex;
         for (elemIndex = 0; elemIndex < curr.keys.length; elemIndex++) {
-            printTree(curr.children[elemIndex], builder);
+            printTree((BTreeStore<KEY, VALUE>) curr.children[elemIndex], builder);
             if (curr.keys[elemIndex] == null) {
                 elemIndex++;
                 break;
@@ -436,7 +438,7 @@ public class BTreeStore<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
             builder.append(curr.values[elemIndex]);
             builder.append(" ");
         }
-        printTree(curr.children[elemIndex], builder);
+        printTree((BTreeStore<KEY, VALUE>) curr.children[elemIndex], builder);
         return builder;
     }
 

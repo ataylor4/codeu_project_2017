@@ -72,7 +72,7 @@ public class BTreeStoreTest {
             }
         }
         for (int i = 0; i < stringsToTest.length; i++) {
-            Iterator iterator = test.at(i).iterator();
+            BTreeIterator<Integer, String> iterator = test.at(i).iterator();
             for (int j = 0; j < 3; j++) {
                 assert (iterator.next() == stringsToTest[i]);
             }
@@ -90,7 +90,7 @@ public class BTreeStoreTest {
             test = test.insert(stringsToTest[i], stringsToTest[i], false);
         }
 
-        BTreeIterator result = test.range("abc", "mno").iterator();
+        BTreeIterator<String, String> result = test.range("abc", "mno").iterator();
         for (int i = 0; i < stringsToTest.length; i++) {
             assertTrue(result.hasNext());
             assertEquals(stringsToTest[i], result.next());
@@ -106,7 +106,7 @@ public class BTreeStoreTest {
             test = test.insert(i, stringsToTest[i], false);
         }
 
-        Iterator result = test.range(-1, 8).iterator();
+        BTreeIterator<Integer, String> result = test.range(-1, 8).iterator();
         for (int i = 0; i < stringsToTest.length; i++) {
             assertTrue(result.hasNext());
             assertEquals(stringsToTest[i], result.next());
@@ -122,7 +122,7 @@ public class BTreeStoreTest {
             test = test.insert(stringsToTest[i], stringsToTest[i], false);
         }
 
-        BTreeIterator result = test.range("d", "k").iterator();
+        BTreeIterator<String, String> result = test.range("d", "k").iterator();
         for (int i = 2; i < stringsToTest.length - 1; i++) {
             assertTrue(result.hasNext());
             assertEquals(stringsToTest[i], result.next());
@@ -138,7 +138,7 @@ public class BTreeStoreTest {
             test = test.insert(stringsToTest[i], stringsToTest[i], false);
         }
 
-        BTreeIterator result = test.all().iterator();
+        BTreeIterator<String, String> result = test.all().iterator();
         for (int i = 0; i < stringsToTest.length; i++) {
             assertTrue(result.hasNext());
             assertEquals(stringsToTest[i], result.next());
@@ -154,7 +154,7 @@ public class BTreeStoreTest {
             test = test.insert(stringsToTest[i], stringsToTest[i], false);
         }
 
-        BTreeIterator result = test.after("d").iterator();
+        BTreeIterator<String, String> result = test.after("d").iterator();
         for (int i = 2; i < stringsToTest.length; i++) {
             assertTrue(result.hasNext());
             assertEquals(stringsToTest[i], result.next());
@@ -170,7 +170,7 @@ public class BTreeStoreTest {
             test = test.insert(stringsToTest[i], stringsToTest[i], true);
         }
 
-        BTreeIterator result = test.after("def").iterator();
+        BTreeIterator<String, String> result = test.after("def").iterator();
         for (int i = 5; i < stringsToTest.length; i++) {
             assertTrue(result.hasNext());
             assertEquals(stringsToTest[i], result.next());
@@ -186,7 +186,7 @@ public class BTreeStoreTest {
             test = test.insert(stringsToTest[i], stringsToTest[i], true);
         }
 
-        BTreeIterator result = test.before("g").iterator();
+        BTreeIterator<String, String> result = test.before("g").iterator();
         for (int i = 0; i < 3; i++) {
             assertTrue(result.hasNext());
             assertEquals(stringsToTest[i], result.next());
@@ -202,7 +202,7 @@ public class BTreeStoreTest {
             test = test.insert(stringsToTest[i], stringsToTest[i], true);
         }
 
-        BTreeIterator result = test.before("def").iterator();
+        BTreeIterator<String, String> result = test.before("def").iterator();
         for (int i = 0; i < 2; i++) {
             assertTrue(result.hasNext());
             assertEquals(stringsToTest[i], result.next());

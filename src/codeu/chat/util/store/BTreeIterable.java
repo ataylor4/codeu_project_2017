@@ -7,7 +7,7 @@ import java.util.Comparator;
  * Includes a bound on the highest element (dynamically calculates the next element)
  */
 @SuppressWarnings("unchecked")
-public class BTreeIterable<KEY, VALUE> implements Iterable {
+public class BTreeIterable<KEY, VALUE> implements Iterable<VALUE> {
     private BTreeIterator<KEY, VALUE> iterator;
 
     protected BTreeIterable(BTreeStore<KEY, VALUE> curr, int index, KEY maxKey, Comparator<? super KEY> comparator) {
@@ -24,7 +24,7 @@ public class BTreeIterable<KEY, VALUE> implements Iterable {
     }
 
     @Override
-    public BTreeIterator iterator() {
+    public BTreeIterator<KEY, VALUE> iterator() {
         return iterator;
     }
 }
