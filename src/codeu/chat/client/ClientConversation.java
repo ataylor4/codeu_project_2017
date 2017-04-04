@@ -85,7 +85,7 @@ public final class ClientConversation {
   public void showCurrent() {
     printConversation(currentSummary, userContext);
   }
-  
+
   public void startConversation(String title, Uuid owner) {
     final boolean validInputs = isValidTitle(title);
 

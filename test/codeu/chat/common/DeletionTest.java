@@ -1,16 +1,15 @@
 package codeu.chat.common;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import codeu.chat.server.Controller;
+import codeu.chat.server.Model;
 
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
-
-
-import codeu.chat.server.Controller;
-import codeu.chat.server.Model;
 
 public final class DeletionTest {
 
@@ -39,6 +38,7 @@ public final class DeletionTest {
                 "conversation",
                 user.id);
         final Map<Uuid, ConversationSummary> summariesByUuid = new HashMap<>();
+
         ConversationSummary cs = conversation.summary;
         summariesByUuid.put(cs.id, cs);
         summariesByUuid.remove(cs.id);
@@ -60,11 +60,7 @@ public final class DeletionTest {
         conversationContents.add(message);
         conversationContents.remove(0);
         int sizeAfterRemove = conversationContents.size();
-
         assertFalse(conversationContents.contains(message));
         assertEquals(sizeAfterRemove, 0);
     }
-
-
-
 }
