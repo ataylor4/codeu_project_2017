@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import codeu.chat.server.Controller;
 import codeu.chat.server.Model;
+import codeu.chat.client.Password;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -13,7 +14,7 @@ import static org.junit.Assert.*;
 
 public final class DeletionTest {
 
-    /*private Model model;
+    private Model model;
     private BasicController controller;
 
     @Before
@@ -24,8 +25,7 @@ public final class DeletionTest {
 
     @Test
     public void testUserDeletion() {
-        final User user = controller.newUser("user");
-        controller.newUser(name, Password.createPassword(name, password)
+        final User user = controller.newUser("user", Password.createPassword("user", "p1$p2$p3"));
         final Map<Uuid, User> usersById = new HashMap<>();
         usersById.put(user.id, user);
         usersById.remove(user.id);
@@ -34,7 +34,7 @@ public final class DeletionTest {
 
     @Test
     public void testConversationDeletion() {
-        final User user = controller.newUser("user");
+        final User user = controller.newUser("user", Password.createPassword("user", "p1$p2$p3"));
         final Conversation conversation = controller.newConversation(
                 "conversation",
                 user.id);
@@ -48,7 +48,7 @@ public final class DeletionTest {
 
     @Test
     public void testMessageDeletion() {
-        final User user = controller.newUser("user");
+        final User user = controller.newUser("user", Password.createPassword("user", "p1$p2$p3"));
         final Conversation conversation = controller.newConversation(
                 "conversation",
                 user.id);
@@ -63,5 +63,5 @@ public final class DeletionTest {
         int sizeAfterRemove = conversationContents.size();
         assertFalse(conversationContents.contains(message));
         assertEquals(sizeAfterRemove, 0);
-    }*/
+    }
 }
