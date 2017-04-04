@@ -227,5 +227,29 @@ public class BTreeStoreTest {
             assertFalse(test.at(numsToTest[i]).iterator().hasNext());
         }
     }
+
+    @Test
+    public void testAddAndDeleteFromTree() {
+        BTreeStore<Integer, Integer> test = new BTreeStore<>(2, Integer::compareTo);
+        int[] numsToTest = new int[]{
+            5, 33, 29, 7, 18, 81, 44, 12, 93, 27, 63, 19, 31, -5, 99
+        };
+        for (int i = 0; i < numsToTest.length; i++) {
+            test = test.insert(numsToTest[i], numsToTest[i], true);
+        }
+        for (int i = 8; i < numsToTest.length; i++) {
+            test = test.delete(numsToTest[i]);
+        }
+        for (int i = 0; i < 8; i++) {
+            assertTrue(test.at(numsToTest[i]).iterator().hasNext());
+        }
+        for (int i = 8; i < numsToTest.length; i++) {
+            assertFalse(test.at(numsToTest[i]).iterator().hasNext());
+        }
+        for (int i = 8; i < numsToTest.length; i++) {
+            test = test.insert(numsToTest[i], numsToTest[i], true);
+        }
+        assertEquals("-5 5 7 12 18 19 27 29 31 33 44 63 81 93 99", test.toString());
+    }
 }
 

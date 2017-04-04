@@ -21,8 +21,8 @@ public class BTreeIterator<KEY, VALUE> implements Iterator<VALUE> {
 
     @Override
     public boolean hasNext() {
-        return curr != null && ((inclusiveBound && comparator.compare(curr.getKey(index), maxKey) <= 0) ||
-            (!inclusiveBound && comparator.compare(curr.getKey(index), maxKey) < 0));
+        return curr != null && ((inclusiveBound && comparator.compare(curr.getKey(index), maxKey) <= 0)
+            || (!inclusiveBound && comparator.compare(curr.getKey(index), maxKey) < 0));
     }
 
     @Override
