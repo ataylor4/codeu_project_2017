@@ -1,8 +1,18 @@
-.idea/
-.idea/misc.xml
-.idea/modules.xml
 .idea/vcs.xml
-.idea/workspace.xml
-bin/
 codeu_project_2017.iml
-out/
+.idea/
+README.md
+clean.sh
+make.sh
+run_client.sh
+run_server.sh
+run_simple_gui_client.sh
+test/
+test.sh
+third_party/
+bin/
+.idea/workspace.xml
+ bin/chat_client_log.log
+bin/chat_server_log.log
+bin/chat_simple_gui_client_log.log
+>>>>>>> cdc436e7a2721ca5f46f8c1d6d0214eb414cd47f
