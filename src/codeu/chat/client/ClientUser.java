@@ -23,6 +23,7 @@ import codeu.chat.common.User;
 import codeu.chat.common.Uuid;
 import codeu.chat.util.Logger;
 import codeu.chat.util.store.Store;
+import codeu.chat.client.Password;
 
 public final class ClientUser {
 
@@ -37,7 +38,14 @@ public final class ClientUser {
   private final Map<Uuid, User> usersById = new HashMap<>();
 
   // This is the set of users known to the server, sorted by name.
-  private Store<String, User> usersByName = new Store<>(String.CASE_INSENSITIVE_ORDER);
+  public static Store<String, User> usersByName = new Store<>(String.CASE_INSENSITIVE_ORDER);
+
+  //set of passwords known by the server
+  public static Store<String, String> passwordsDB = new Store<>(String.CASE_INSENSITIVE_ORDER);
+
+  //set of security questions known by the server
+  //public static Store<String, String> passwordRecoveryDB = new Store<>(String.CASE_INSENSITIVE_ORDER);
+
 
   public ClientUser(Controller controller, View view) {
     this.controller = controller;
@@ -51,6 +59,7 @@ public final class ClientUser {
       clean = false;
     } else {
 
+      clean=userName.matches("[A-Za-z0-9_ @]+");
       // TODO: check for invalid characters
 
     }
@@ -65,11 +74,12 @@ public final class ClientUser {
     return current;
   }
 
-  public boolean signInUser(String name) {
+  public boolean signInUser(String name, int mode) { //mode 0 is signing in via commandline while mode 1 is signing in via GUI
     updateUsers();
 
     final User prev = current;
-    if (name != null) {
+    final User temp = usersByName.first(name);
+    if (( name!=null && mode==1)|| (name != null && Password.authenticateUserCommandline(name, temp) && mode==0)) {
       final User newCurrent = usersByName.first(name);
       if (newCurrent != null) {
         current = newCurrent;
@@ -88,18 +98,22 @@ public final class ClientUser {
     printUser(current);
   }
 
-  public void addUser(String name) {
+  public void addUser(String name, String password) {
     final boolean validInputs = isValidName(name);
-
-    final User user = (validInputs) ? controller.newUser(name) : null;
+    //System.out.println(Password.createPassword(name, password));
+    final User user = (validInputs) ? controller.newUser(name, Password.createPassword(name, password)) : null;
 
     if (user == null) {
       System.out.format("Error: user not created - %s.\n",
-          (validInputs) ? "server failure" : "bad input value");
+              (validInputs) ? "server failure" : "bad input value");
     } else {
-      LOG.info("New user complete, Name= \"%s\" UUID=%s", user.name, user.id);
+      LOG.info("New user complete, Name= \"%s\" UUID=\"%s\" security=%s", user.name, user.id, user.security);
       updateUsers();
     }
+  }
+//to be able to acccess the passwords database in an external class
+  public final Store<String, String> getPasswordDB(){
+    return passwordsDB;
   }
 
   public void showAllUsers() {
@@ -139,7 +153,7 @@ public final class ClientUser {
 
   public static String getUserInfoString(User user) {
     return (user == null) ? "Null user" :
-        String.format(" User: %s\n   Id: %s\n   created: %s\n", user.name, user.id, user.creation);
+            String.format(" User: %s\n   Id: %s\n   created: %s\n", user.name, user.id, user.creation);
   }
 
   public String showUserInfo(String uname) {
