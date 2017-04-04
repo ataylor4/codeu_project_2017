@@ -85,8 +85,7 @@ public final class ClientConversation {
   public void showCurrent() {
     printConversation(currentSummary, userContext);
   }
-
-  // essentially add conversation
+  
   public void startConversation(String title, Uuid owner) {
     final boolean validInputs = isValidTitle(title);
 
@@ -113,13 +112,9 @@ public final class ClientConversation {
       return;
     }
     summariesByUuid.remove(cs.id);
-    //summariesSortedByTitle.remove(cs.title); // Need to update with BTree store
+    LOG.info("Conversation removed: Title= \"%s\"\n", title);
+    System.out.format("Conversation removed: Title= \"%s\"\n", title);
 
-    if (!summariesByUuid.containsKey(cs.id)) {
-      LOG.info("Conversation removed: Title= \"%s\"\n", title);
-      System.out.format("Conversation removed: Title= \"%s\"\n", title);
-
-    }
   }
 
   public void setCurrent(ConversationSummary conv) { currentSummary = conv; }

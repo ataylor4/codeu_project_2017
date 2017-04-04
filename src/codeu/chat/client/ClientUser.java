@@ -104,14 +104,12 @@ public final class ClientUser {
 
   // For u-remove command.
   public void removeUser(String name) {
-    User user = usersByName.first(name);
-    usersById.remove(user.id); // need uuid to remove
-    //usersByName.remove(user.name); // need to update with B-Tree store
 
-    if (!usersById.containsKey(user.id)) {
-      System.out.format("User removed, Name= \"%s\"\n", name);
-      LOG.info("User removed, Name= \"%s\"\n", name);
-    }
+    User user = usersByName.first(name);
+    usersById.remove(user.id);
+    System.out.format("User removed, Name= \"%s\"\n", name);
+    LOG.info("User removed, Name= \"%s\"\n", name);
+
   }
 
   public void showAllUsers() {

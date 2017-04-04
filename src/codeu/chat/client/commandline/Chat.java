@@ -302,8 +302,9 @@ public final class Chat {
   }
 
   // Delete an existing user.
-  private void removeUser(String name) { clientContext.user.removeUser(name);}
-
+  private void removeUser(String name) {
+    clientContext.user.removeUser(name);
+  }
 
   // Display all users known to server.
   private void showAllUsers() {

@@ -116,7 +116,6 @@ public final class ClientMessage {
   public void removeMessage(String stringIndex) {
     int index = Integer.parseInt(stringIndex);
     conversationContents.remove(index);
-
     LOG.info("Message removed: Index= \"%s\"\n", stringIndex);
     System.out.format("Message removed: Index= \"%s\"\n", stringIndex);
   }
