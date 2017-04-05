@@ -5,6 +5,7 @@ import java.util.Comparator;
 
 @SuppressWarnings("unchecked")
 public class BTreeStore<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
+    public static final int NUM_POINTERS = 2;
     private BTreeStore<KEY, VALUE> parent;
     private Object[] children;
     private Object[] keys;
@@ -48,6 +49,9 @@ public class BTreeStore<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
     }
 
     public BTreeIterable<KEY, VALUE> range(KEY min, KEY max) {
+        if (this.numElems == 0) {
+            return new BTreeIterable<>(null, 0, null, treeInformation.comparator);
+        }
         BTreeStore<KEY, VALUE> curr = this;
         BTreeIterable<KEY, VALUE> currentCeiling = new BTreeIterable<>(null, 0, max, treeInformation.comparator);
         while (curr != null) {
@@ -76,12 +80,18 @@ public class BTreeStore<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
     }
 
     public BTreeIterable<KEY, VALUE> all() {
+        if (this.numElems == 0) {
+            return new BTreeIterable<>(null, 0, null, treeInformation.comparator);
+        }
         BTreeStore<KEY, VALUE> min = minimumTree(this);
         BTreeStore<KEY, VALUE> max = maximumTree(this);
         return range((KEY) min.keys[0], (KEY) max.keys[max.numElems - 1]);
     }
 
     public BTreeIterable<KEY, VALUE> after(KEY start) {
+        if (this.numElems == 0) {
+            return new BTreeIterable<>(null, 0, null, treeInformation.comparator);
+        }
         BTreeStore<KEY, VALUE> max = maximumTree(this);
         BTreeIterator<KEY, VALUE> result = range(start, (KEY) max.keys[max.numElems - 1]).iterator();
         while (result.getKey() != null &&
@@ -92,6 +102,9 @@ public class BTreeStore<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
     }
 
     public BTreeIterable<KEY, VALUE> before(KEY end) {
+        if (this.numElems == 0) {
+            return new BTreeIterable<>(null, 0, null, treeInformation.comparator);
+        }
         BTreeStore<KEY, VALUE> min = minimumTree(this);
         return range((KEY) min.keys[0], end).setExclusive();
     }
