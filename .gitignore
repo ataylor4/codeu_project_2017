@@ -1,17 +1,6 @@
-.idea/vcs.xml
-codeu_project_2017.iml
 .idea/
-README.md
-clean.sh
-make.sh
-run_client.sh
-run_server.sh
-run_simple_gui_client.sh
-test/
-test.sh
-third_party/
 bin/
-.idea/workspace.xml
- bin/chat_client_log.log
-bin/chat_server_log.log
-bin/chat_simple_gui_client_log.log
+*.log
+out/
+codeu_project_2017.iml
+.gitignore
