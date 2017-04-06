@@ -54,6 +54,7 @@ public class BTreeIterator<KEY, VALUE> implements Iterator<VALUE> {
             BTreeStore<KEY, VALUE> prev = curr;
             int nextIndex;
             KEY prevKey = curr.getKey(index);
+            curr = next;
             while (next != null) {
                 nextIndex = next.getNext(prevKey, next.getNumElems());
                 while (nextIndex < next.getNumElems() + 1 &&
