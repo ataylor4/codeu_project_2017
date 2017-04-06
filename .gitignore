@@ -1,7 +1,6 @@
-codeu_project_2017.iml
-.idea/*
-bin/*
-out/
-.gitignore
+.idea/
+bin/
 *.log
-*.sh
+out/
+codeu_project_2017.iml
+.gitignore
