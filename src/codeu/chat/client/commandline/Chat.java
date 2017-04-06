@@ -51,13 +51,16 @@ public final class Chat {
     System.out.println("   current   - show current user, conversation, message.");
     System.out.println("User commands:");
     System.out.println("   u-add <name>  - add a new user.");
+    System.out.println("   u-remove <name> - delete an existing user.");
     System.out.println("   u-list-all    - list all users known to system.");
     System.out.println("Conversation commands:");
     System.out.println("   c-add <title>    - add a new conversation.");
+    System.out.println("   c-remove <title> - delete an existing conversation.");
     System.out.println("   c-list-all       - list all conversations known to system.");
     System.out.println("   c-select <index> - select conversation from list.");
     System.out.println("Message commands:");
     System.out.println("   m-add <body>     - add a new message to the current conversation.");
+    System.out.println("   m-remove <index>  - delete an existing message from the current conversation.");
     System.out.println("   m-list-all       - list all messages in the current conversation.");
     System.out.println("   m-next <index>   - index of next message to view.");
     System.out.println("   m-show <count>   - show next <count> messages.");
@@ -113,6 +116,13 @@ public final class Chat {
         addUser(tokenScanner.nextLine().trim());
       }
 
+    } else if (token.equals("u-remove")) {
+
+      if (!tokenScanner.hasNext()) {
+        System.out.println("ERROR: Username not supplied.");
+      } else {
+        removeUser(tokenScanner.nextLine().trim());
+      }
     } else if (token.equals("u-list-all")) {
 
       showAllUsers();
@@ -127,6 +137,19 @@ public final class Chat {
         } else {
           final String title = tokenScanner.nextLine().trim();
           clientContext.conversation.startConversation(title, clientContext.user.getCurrent().id);
+        }
+      }
+
+    } else if (token.equals("c-remove")) {
+
+      if (!clientContext.user.hasCurrent()) {
+        System.out.println("ERROR: Not signed in.");
+      } else {
+        if (!tokenScanner.hasNext()) {
+          System.out.println("ERROR: Conversation title not supplied.");
+        } else {
+          final String title = tokenScanner.nextLine().trim();
+          clientContext.conversation.removeConversation(title);
         }
       }
 
@@ -153,7 +176,19 @@ public final class Chat {
                   tokenScanner.nextLine().trim());
         }
       }
+    } else if (token.equals("m-remove")) {
 
+      if (!clientContext.user.hasCurrent()) {
+        System.out.println("ERROR: Not signed in.");
+      } else if (!clientContext.conversation.hasCurrent()) {
+        System.out.println("ERROR: No conversation selected.");
+      } else {
+        if (!tokenScanner.hasNext()) {
+          System.out.println("ERROR: Message body not supplied.");
+        } else {
+          clientContext.message.removeMessage(tokenScanner.nextLine().trim());
+        }
+      }
     } else if (token.equals("m-list-all")) {
 
       if (!clientContext.conversation.hasCurrent()) {
@@ -271,6 +306,9 @@ public final class Chat {
   private void addUser(String name) {
     clientContext.user.addUser(name, Password.promptForPassword(name));
   }
+
+  // Delete an existing user.
+  private void removeUser(String name) { clientContext.user.removeUser(name);}
 
   // Display all users known to server.
   private void showAllUsers() {
