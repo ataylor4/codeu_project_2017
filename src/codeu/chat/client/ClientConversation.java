@@ -23,7 +23,7 @@ import codeu.chat.common.ConversationSummary;
 import codeu.chat.common.Uuid;
 import codeu.chat.util.Logger;
 import codeu.chat.util.Method;
-import codeu.chat.util.store.Store;
+import codeu.chat.util.store.BTreeStore;
 
 public final class ClientConversation {
 
@@ -42,8 +42,8 @@ public final class ClientConversation {
   private final Map<Uuid, ConversationSummary> summariesByUuid = new HashMap<>();
 
   // This is the set of conversations known to the server, sorted by title.
-  private Store<String, ConversationSummary> summariesSortedByTitle =
-      new Store<>(String.CASE_INSENSITIVE_ORDER);
+  private BTreeStore<String, ConversationSummary> summariesSortedByTitle =
+      new BTreeStore<>(BTreeStore.NUM_POINTERS, String.CASE_INSENSITIVE_ORDER);
 
   public ClientConversation(Controller controller, View view, ClientUser userContext) {
     this.controller = controller;
@@ -173,11 +173,11 @@ public final class ClientConversation {
   public void updateAllConversations(boolean currentChanged) {
 
     summariesByUuid.clear();
-    summariesSortedByTitle = new Store<>(String.CASE_INSENSITIVE_ORDER);
+    summariesSortedByTitle = new BTreeStore<>(BTreeStore.NUM_POINTERS, String.CASE_INSENSITIVE_ORDER);
 
     for (final ConversationSummary cs : view.getAllConversations()) {
       summariesByUuid.put(cs.id, cs);
-      summariesSortedByTitle.insert(cs.title, cs);
+      summariesSortedByTitle = summariesSortedByTitle.insert(cs.title, cs, false);
     }
 
     if (currentChanged) {

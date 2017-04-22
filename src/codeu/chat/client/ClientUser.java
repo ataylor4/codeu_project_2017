@@ -22,7 +22,7 @@ import java.util.Map;
 import codeu.chat.common.User;
 import codeu.chat.common.Uuid;
 import codeu.chat.util.Logger;
-import codeu.chat.util.store.Store;
+import codeu.chat.util.store.BTreeStore;
 //import codeu.chat.client.Password;
 
 public final class ClientUser {
@@ -38,7 +38,8 @@ public final class ClientUser {
   private final Map<Uuid, User> usersById = new HashMap<>();
 
   // This is the set of users known to the server, sorted by name.
-  public static Store<String, User> usersByName = new Store<>(String.CASE_INSENSITIVE_ORDER);
+  public static BTreeStore<String, User> usersByName
+      = new BTreeStore<>(BTreeStore.NUM_POINTERS, String.CASE_INSENSITIVE_ORDER);
 
   public ClientUser(Controller controller, View view) {
     this.controller = controller;
@@ -53,7 +54,6 @@ public final class ClientUser {
     } else {
 
       clean=userName.matches("[A-Za-z0-9_ @]+");
-      // TODO: check for invalid characters
 
     }
     return clean;
@@ -72,10 +72,12 @@ public final class ClientUser {
 
     final User prev = current;
     final User temp = usersByName.first(name);
-    if (( name!=null && mode==1)|| (name != null && Password.authenticateUserCommandline(name, temp) && mode==0)) {
-      final User newCurrent = usersByName.first(name);
-      if (newCurrent != null) {
-        current = newCurrent;
+    if(name!=null) {
+      if (mode == 1 || (Password.authenticateUserCommandline(name, temp) && mode == 0)) {
+        final User newCurrent = usersByName.first(name);
+        if (newCurrent != null) {
+          current = newCurrent;
+        }
       }
     }
     return (prev != current);
@@ -93,14 +95,13 @@ public final class ClientUser {
 
   public void  addUser(String name, String password) {
     final boolean validInputs = isValidName(name);
-    //System.out.println(Password.createPassword(name, password));
     final User user = (validInputs) ? controller.newUser(name, Password.createPassword(name, password)) : null;
 
     if (user == null) {
       System.out.format("Error: user not created - %s.\n",
               (validInputs) ? "server failure" : "bad input value");
     } else {
-      LOG.info("New user complete, Name= \"%s\" UUID=\"%s\" security=%s", user.name, user.id, user.security);
+      LOG.info("New user complete, Name= \"%s\" UUID=%s", user.name, user.id, user.security);
       updateUsers();
     }
   }
@@ -142,11 +143,11 @@ public final class ClientUser {
 
   public void updateUsers() {
     usersById.clear();
-    usersByName = new Store<>(String.CASE_INSENSITIVE_ORDER);
+    usersByName = new BTreeStore<>(BTreeStore.NUM_POINTERS, String.CASE_INSENSITIVE_ORDER);
 
     for (final User user : view.getUsersExcluding(EMPTY)) {
       usersById.put(user.id, user);
-      usersByName.insert(user.name, user);
+      usersByName.insert(user.name, user, true);
     }
   }
 

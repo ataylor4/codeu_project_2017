@@ -17,13 +17,12 @@ package codeu.chat.server;
 import java.util.Comparator;
 
 import codeu.chat.common.Conversation;
-import codeu.chat.common.ConversationSummary;
 import codeu.chat.common.LinearUuidGenerator;
 import codeu.chat.common.Message;
 import codeu.chat.common.Time;
 import codeu.chat.common.User;
 import codeu.chat.common.Uuid;
-import codeu.chat.util.store.Store;
+import codeu.chat.util.store.BTreeStore;
 import codeu.chat.util.store.StoreAccessor;
 
 public final class Model {
@@ -53,17 +52,20 @@ public final class Model {
 
   private static final Comparator<String> STRING_COMPARE = String.CASE_INSENSITIVE_ORDER;
 
-  private final Store<Uuid, User> userById = new Store<>(UUID_COMPARE);
-  private final Store<Time, User> userByTime = new Store<>(TIME_COMPARE);
-  private final Store<String, User> userByText = new Store<>(STRING_COMPARE);
+  private BTreeStore<Uuid, User> userById = new BTreeStore<>(BTreeStore.NUM_POINTERS, UUID_COMPARE);
+  private BTreeStore<Time, User> userByTime = new BTreeStore<>(BTreeStore.NUM_POINTERS, TIME_COMPARE);
+  private BTreeStore<String, User> userByText = new BTreeStore<>(BTreeStore.NUM_POINTERS, STRING_COMPARE);
 
-  private final Store<Uuid, Conversation> conversationById = new Store<>(UUID_COMPARE);
-  private final Store<Time, Conversation> conversationByTime = new Store<>(TIME_COMPARE);
-  private final Store<String, Conversation> conversationByText = new Store<>(STRING_COMPARE);
+  private BTreeStore<Uuid, Conversation> conversationById
+      = new BTreeStore<>(BTreeStore.NUM_POINTERS, UUID_COMPARE);
+  private BTreeStore<Time, Conversation> conversationByTime
+      = new BTreeStore<>(BTreeStore.NUM_POINTERS, TIME_COMPARE);
+  private BTreeStore<String, Conversation> conversationByText
+      = new BTreeStore<>(BTreeStore.NUM_POINTERS, STRING_COMPARE);
 
-  private final Store<Uuid, Message> messageById = new Store<>(UUID_COMPARE);
-  private final Store<Time, Message> messageByTime = new Store<>(TIME_COMPARE);
-  private final Store<String, Message> messageByText = new Store<>(STRING_COMPARE);
+  private BTreeStore<Uuid, Message> messageById = new BTreeStore<>(BTreeStore.NUM_POINTERS, UUID_COMPARE);
+  private BTreeStore<Time, Message> messageByTime = new BTreeStore<>(BTreeStore.NUM_POINTERS, TIME_COMPARE);
+  private BTreeStore<String, Message> messageByText = new BTreeStore<>(BTreeStore.NUM_POINTERS, STRING_COMPARE);
 
   private final Uuid.Generator userGenerations = new LinearUuidGenerator(null, 1, Integer.MAX_VALUE);
   private Uuid currentUserGeneration = userGenerations.make();
@@ -71,9 +73,9 @@ public final class Model {
   public void add(User user) {
     currentUserGeneration = userGenerations.make();
 
-    userById.insert(user.id, user);
-    userByTime.insert(user.creation, user);
-    userByText.insert(user.name, user);
+    userById = userById.insert(user.id, user, true);
+    userByTime = userByTime.insert(user.creation, user, true);
+    userByText = userByText.insert(user.name, user, true);
   }
 
   public StoreAccessor<Uuid, User> userById() {
@@ -93,9 +95,9 @@ public final class Model {
   }
 
   public void add(Conversation conversation) {
-    conversationById.insert(conversation.id, conversation);
-    conversationByTime.insert(conversation.creation, conversation);
-    conversationByText.insert(conversation.title, conversation);
+    conversationById = conversationById.insert(conversation.id, conversation, false);
+    conversationByTime = conversationByTime.insert(conversation.creation, conversation, true);
+    conversationByText = conversationByText.insert(conversation.title, conversation, true);
   }
 
   public StoreAccessor<Uuid, Conversation> conversationById() {
@@ -111,9 +113,9 @@ public final class Model {
   }
 
   public void add(Message message) {
-    messageById.insert(message.id, message);
-    messageByTime.insert(message.creation, message);
-    messageByText.insert(message.content, message);
+    messageById = messageById.insert(message.id, message, false);
+    messageByTime = messageByTime.insert(message.creation, message, true);
+    messageByText = messageByText.insert(message.content, message, true);
   }
 
   public StoreAccessor<Uuid, Message> messageById() {

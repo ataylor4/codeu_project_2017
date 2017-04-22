@@ -251,5 +251,11 @@ public class BTreeStoreTest {
         }
         assertEquals("-5 5 7 12 18 19 27 29 31 33 44 63 81 93 99", test.toString());
     }
+
+    @Test
+    public void testAllEmpty() {
+        BTreeStore<Integer, Integer> test = new BTreeStore<>(2, Integer::compareTo);
+        assertFalse(test.all().iterator().hasNext());
+    }
 }
 
