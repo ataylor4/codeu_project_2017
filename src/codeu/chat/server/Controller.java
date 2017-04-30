@@ -79,6 +79,10 @@ public final class Controller implements RawController, BasicController {
       } else {
         final Message lastMessage = model.messageById().first(foundConversation.lastMessage);
         lastMessage.next = message.id;
+        model.messageById().update(foundConversation.lastMessage, lastMessage);
+        model.messageByText().update(lastMessage.content, lastMessage);
+        model.messageByTime().update(lastMessage.creation, lastMessage);
+
       }
 
       // If the first message points to NULL it means that the conversation was empty and that
@@ -97,6 +101,9 @@ public final class Controller implements RawController, BasicController {
       if (!foundConversation.users.contains(foundUser)) {
         foundConversation.users.add(foundUser.id);
       }
+      model.conversationById().update(conversation, foundConversation);
+      model.conversationByText().update(foundConversation.title, foundConversation);
+      model.conversationByTime().update(foundConversation.creation, foundConversation);
     }
 
     return message;

@@ -23,11 +23,13 @@ import codeu.chat.common.ConversationSummary;
 import codeu.chat.common.Uuid;
 import codeu.chat.util.Logger;
 import codeu.chat.util.Method;
+import codeu.chat.util.Serializers;
 import codeu.chat.util.store.BTreeStore;
 
 public final class ClientConversation {
 
   private final static Logger.Log LOG = Logger.newLog(ClientConversation.class);
+  private final static String STORE_FILENAME = "ClientConversation_StringConversationSummary.log";
 
   private final Controller controller;
   private final View view;
@@ -43,7 +45,8 @@ public final class ClientConversation {
 
   // This is the set of conversations known to the server, sorted by title.
   private BTreeStore<String, ConversationSummary> summariesSortedByTitle =
-      new BTreeStore<>(BTreeStore.NUM_POINTERS, String.CASE_INSENSITIVE_ORDER);
+      new BTreeStore<>(BTreeStore.NUM_POINTERS, String.CASE_INSENSITIVE_ORDER,
+          Serializers.STRING, ConversationSummary.SERIALIZER, STORE_FILENAME);
 
   public ClientConversation(Controller controller, View view, ClientUser userContext) {
     this.controller = controller;
@@ -173,7 +176,7 @@ public final class ClientConversation {
   public void updateAllConversations(boolean currentChanged) {
 
     summariesByUuid.clear();
-    summariesSortedByTitle = new BTreeStore<>(BTreeStore.NUM_POINTERS, String.CASE_INSENSITIVE_ORDER);
+    summariesSortedByTitle.clear(STORE_FILENAME);
 
     for (final ConversationSummary cs : view.getAllConversations()) {
       summariesByUuid.put(cs.id, cs);
