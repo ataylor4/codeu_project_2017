@@ -151,7 +151,7 @@ public final class ClientUser {
 
     for (final User user : view.getUsersExcluding(EMPTY)) {
       usersById.put(user.id, user);
-      usersByName.insert(user.name, user, true);
+      usersByName = usersByName.insert(user.name, user, true);
     }
   }
 
