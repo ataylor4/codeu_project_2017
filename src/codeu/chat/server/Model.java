@@ -22,10 +22,13 @@ import codeu.chat.common.Message;
 import codeu.chat.common.Time;
 import codeu.chat.common.User;
 import codeu.chat.common.Uuid;
+import codeu.chat.common.Uuids;
+import codeu.chat.util.Serializers;
 import codeu.chat.util.store.BTreeStore;
 import codeu.chat.util.store.StoreAccessor;
 
 public final class Model {
+  private static final String STORE_FILENAME = "Model_";
 
   private static final Comparator<Uuid> UUID_COMPARE = new Comparator<Uuid>() {
 
@@ -52,20 +55,29 @@ public final class Model {
 
   private static final Comparator<String> STRING_COMPARE = String.CASE_INSENSITIVE_ORDER;
 
-  private BTreeStore<Uuid, User> userById = new BTreeStore<>(BTreeStore.NUM_POINTERS, UUID_COMPARE);
-  private BTreeStore<Time, User> userByTime = new BTreeStore<>(BTreeStore.NUM_POINTERS, TIME_COMPARE);
-  private BTreeStore<String, User> userByText = new BTreeStore<>(BTreeStore.NUM_POINTERS, STRING_COMPARE);
+  private BTreeStore<Uuid, User> userById = new BTreeStore<>(BTreeStore.NUM_POINTERS, UUID_COMPARE,
+      Uuids.SERIALIZER, User.SERIALIZER, STORE_FILENAME + "UuidUser.log");
+  private BTreeStore<Time, User> userByTime = new BTreeStore<>(BTreeStore.NUM_POINTERS, TIME_COMPARE,
+      Time.SERIALIZER, User.SERIALIZER, STORE_FILENAME + "TimeUser.log");
+  private BTreeStore<String, User> userByText = new BTreeStore<>(BTreeStore.NUM_POINTERS, STRING_COMPARE,
+      Serializers.STRING, User.SERIALIZER, STORE_FILENAME + "StringUser.log");
 
   private BTreeStore<Uuid, Conversation> conversationById
-      = new BTreeStore<>(BTreeStore.NUM_POINTERS, UUID_COMPARE);
+      = new BTreeStore<>(BTreeStore.NUM_POINTERS, UUID_COMPARE, Uuids.SERIALIZER,
+      Conversation.SERIALIZER, STORE_FILENAME + "UuidConversation.log");
   private BTreeStore<Time, Conversation> conversationByTime
-      = new BTreeStore<>(BTreeStore.NUM_POINTERS, TIME_COMPARE);
+      = new BTreeStore<>(BTreeStore.NUM_POINTERS, TIME_COMPARE, Time.SERIALIZER,
+      Conversation.SERIALIZER, STORE_FILENAME + "TimeConversation.log");
   private BTreeStore<String, Conversation> conversationByText
-      = new BTreeStore<>(BTreeStore.NUM_POINTERS, STRING_COMPARE);
+      = new BTreeStore<>(BTreeStore.NUM_POINTERS, STRING_COMPARE, Serializers.STRING,
+      Conversation.SERIALIZER, STORE_FILENAME + "StringConversation.log");
 
-  private BTreeStore<Uuid, Message> messageById = new BTreeStore<>(BTreeStore.NUM_POINTERS, UUID_COMPARE);
-  private BTreeStore<Time, Message> messageByTime = new BTreeStore<>(BTreeStore.NUM_POINTERS, TIME_COMPARE);
-  private BTreeStore<String, Message> messageByText = new BTreeStore<>(BTreeStore.NUM_POINTERS, STRING_COMPARE);
+  private BTreeStore<Uuid, Message> messageById = new BTreeStore<>(BTreeStore.NUM_POINTERS, UUID_COMPARE,
+      Uuids.SERIALIZER, Message.SERIALIZER, STORE_FILENAME + "UuidMessage.log");
+  private BTreeStore<Time, Message> messageByTime = new BTreeStore<>(BTreeStore.NUM_POINTERS, TIME_COMPARE,
+      Time.SERIALIZER, Message.SERIALIZER, STORE_FILENAME + "TimeMessage.log");
+  private BTreeStore<String, Message> messageByText = new BTreeStore<>(BTreeStore.NUM_POINTERS, STRING_COMPARE,
+      Serializers.STRING, Message.SERIALIZER, STORE_FILENAME + "StringMessage.log");
 
   private final Uuid.Generator userGenerations = new LinearUuidGenerator(null, 1, Integer.MAX_VALUE);
   private Uuid currentUserGeneration = userGenerations.make();

@@ -1,16 +1,26 @@
 package codeu.chat.util.store;
 
+import codeu.chat.util.Logger;
+import codeu.chat.util.Serializer;
+
+import java.io.*;
 import java.util.Arrays;
 import java.util.Comparator;
 
 @SuppressWarnings("unchecked")
 public class BTreeStore<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
     public static final int NUM_POINTERS = 2;
+
+    private static final Logger.Log LOG = Logger.newLog(BTreeStore.class);
+    private static final int INSERTION = 1;
+    private static final int DELETION = 2;
+    private static final int UPDATE = 3;
+
     private BTreeStore<KEY, VALUE> parent;
     private Object[] children;
     private Object[] keys;
     private Object[] values;
-    private BTreeInformation<KEY> treeInformation;
+    private BTreeInformation<KEY, VALUE> treeInformation;
     private int numElems;
 
     /**
@@ -20,16 +30,28 @@ public class BTreeStore<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
      *                  within the tree. See
      *                  https://docs.oracle.com/javase/8/docs/api/java/util/Comparator.html.
      */
-    public BTreeStore(int minNumPointers, Comparator<? super KEY> comparator) {
-        this(new BTreeInformation<>(minNumPointers, comparator));
+    public BTreeStore(int minNumPointers, Comparator<? super KEY> comparator, Serializer<KEY> keySerializer,
+                      Serializer<VALUE> valueSerializer, String filename) {
+        this(new BTreeInformation<>(minNumPointers, comparator, keySerializer, valueSerializer, filename));
         if (minNumPointers < 2) { // a BTree is only well defined if the min num pointers/node >= 2
             throw new IllegalArgumentException(
                 "Must have a minimimum of two pointers per node (when full)");
         }
         numElems = 0;
+        try {
+            boolean fileExists = treeInformation.file.exists();
+            if (fileExists) {
+                createTreeFromFile(treeInformation.file);
+            } else {
+                treeInformation.file.createNewFile();
+                LOG.warning("Creating the file... could not recover the tree");
+            }
+        } catch (IOException e) {
+            LOG.error(e, "Error creating or reading the file");
+        }
     }
 
-    private BTreeStore(BTreeInformation<KEY> treeInformation) {
+    private BTreeStore(BTreeInformation<KEY, VALUE> treeInformation) {
         this.treeInformation = treeInformation;
         parent = null;
 
@@ -37,6 +59,95 @@ public class BTreeStore<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
         keys = new Object[treeInformation.maxNumPointers - 1];
         values = new Object[treeInformation.maxNumPointers - 1];
         numElems = 0;
+    }
+
+    private void createTreeFromFile(File file) throws IOException {
+        try(InputStream inputStream = new FileInputStream(file)) {
+            BTreeStore<KEY, VALUE> root = new BTreeStore<>(treeInformation);
+            while (true) {
+                int read = inputStream.read();
+                if (read == -1) {
+                    break;
+                }
+                if (read == INSERTION) {
+                    KEY key = treeInformation.keySerializer.read(inputStream);
+                    VALUE value = treeInformation.valueSerializer.read(inputStream);
+                    root = root.insert(key, value, false, false);
+                } else if (read == DELETION) {
+                    KEY key = treeInformation.keySerializer.read(inputStream);
+                    root = root.delete(key, false);
+                } else if (read == UPDATE) {
+                    KEY key = treeInformation.keySerializer.read(inputStream);
+                    VALUE value = treeInformation.valueSerializer.read(inputStream);
+                    root.modify(key, value);
+                }
+            }
+            deepCopy(root);
+        }
+    }
+
+    private void deepCopy(BTreeStore<KEY, VALUE> root) {
+        this.parent = root.parent;
+        this.children = root.children;
+        this.keys = root.keys;
+        this.values = root.values;
+        this.treeInformation = root.treeInformation;
+        this.numElems = root.numElems;
+        for (int i = 0; i <= numElems; i++) {
+            if (children[i] == null) {
+                continue;
+            }
+            ((BTreeStore<KEY, VALUE>) children[i]).parent = this;
+        }
+    }
+
+    public void clear(String filename) {
+        parent = null;
+        children = new Object[treeInformation.maxNumPointers];
+        keys = new Object[treeInformation.maxNumPointers - 1];
+        values = new Object[treeInformation.maxNumPointers - 1];
+        numElems = 0;
+        treeInformation.file.delete();
+        treeInformation.file = new File(filename);
+        try {
+            treeInformation.file.createNewFile();
+        } catch (IOException e) {
+            LOG.error(e, "Error creating new file on clearing tree");
+        }
+
+    }
+
+    /**
+     * To be used whenever the value associated with a key is changed
+     * (current use case: a message is added to a conversation, so we need to update the conversation object)
+     * Note: needs to be called EVEN IF the memory address of value is unchanged
+     * Key must be in the tree, or an IllegalArgumentException is thrown
+     * @param key - the key associated with the updated value
+     * @param value - the updated value
+     * @return true if the key was successfully updated, false otherwise
+     */
+    @Override
+    public boolean update(KEY key, VALUE value) {
+        if (modify(key, value)) {
+            try (FileOutputStream outputStream = new FileOutputStream(treeInformation.file, true)) {
+                outputStream.write(UPDATE);
+                treeInformation.keySerializer.write(outputStream, key);
+                treeInformation.valueSerializer.write(outputStream, value);
+                outputStream.flush();
+            } catch (IOException e) {
+                LOG.error(e, "Error updating key and value");
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private boolean modify(KEY key, VALUE value) {
+        BTreeIterator<KEY, VALUE> toChange = at(key).iterator();
+        if (toChange.hasNext()) {
+            toChange.curr.values[toChange.index] = value;
+        }
+        return toChange.hasNext();
     }
 
     public VALUE first(KEY elem) {
@@ -109,14 +220,7 @@ public class BTreeStore<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
         return range((KEY) min.keys[0], end).setExclusive();
     }
 
-    /**
-     * Inserts the given element into the tree.
-     * @param key: the element to add the tree under
-     * @param value: The element to add into the tree
-     * @param allowDuplicates: true if allowDuplicates elements are allowed
-     * @return The root of the tree after the insertion.
-     */
-    public BTreeStore<KEY, VALUE> insert(KEY key, VALUE value, boolean allowDuplicates) {
+    private BTreeStore<KEY, VALUE> insert(KEY key, VALUE value, boolean allowDuplicates, boolean writeToFile) {
         BTreeStore<KEY, VALUE> curr = this;
         while (true) {
             int index = curr.getNext(key, curr.numElems);
@@ -126,10 +230,53 @@ public class BTreeStore<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
             if (curr.children[index] == null) {
                 //first call, prev's value doesn't matter
                 BTreeStore<KEY, VALUE> newRoot = insertIntoNode(curr, key, value, null, curr);
+                if (writeToFile) {
+                    try (FileOutputStream outputStream = new FileOutputStream(treeInformation.file, true)) {
+                        outputStream.write(INSERTION);
+                        treeInformation.keySerializer.write(outputStream, key);
+                        treeInformation.valueSerializer.write(outputStream, value);
+                        outputStream.flush();
+                    } catch (IOException e) {
+                        LOG.error(e, "Error writing to file on insertion.", key, treeInformation.file);
+                    }
+                }
                 return newRoot == null ? this : newRoot;
             }
             curr = (BTreeStore<KEY, VALUE>) curr.children[index];
         }
+    }
+
+    /**
+     * Inserts the given element into the tree.
+     * @param key: the element to add the tree under
+     * @param value: The element to add into the tree
+     * @param allowDuplicates: true if allowDuplicates elements are allowed
+     * @return The root of the tree after the insertion.
+     */
+    public BTreeStore<KEY, VALUE> insert(KEY key, VALUE value, boolean allowDuplicates) {
+        //always write to file upon real insert
+        return insert(key, value, allowDuplicates, true);
+    }
+
+    private BTreeStore<KEY, VALUE> delete(KEY elem, boolean writeToFile) {
+        BTreeIterator<KEY, VALUE> toDelete = at(elem).iterator();
+        BTreeStore<KEY, VALUE> result = this;
+        if (toDelete.hasNext()) {
+            result = removeFromTree(toDelete.curr, toDelete.index);
+            if (writeToFile) {
+                try (FileOutputStream outputStream = new FileOutputStream(treeInformation.file, true)) {
+                    outputStream.write(DELETION);
+                    treeInformation.keySerializer.write(outputStream, elem);
+                    outputStream.flush();
+                } catch (IOException e) {
+                    LOG.error(e, "Error writing to file on deletion.", elem, treeInformation.file);
+                }
+            }
+            if (result == null) {
+                result = this;
+            }
+        }
+        return result;
     }
 
     /**
@@ -139,15 +286,7 @@ public class BTreeStore<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
      * @return the root of the tree after the deletion
      */
     public BTreeStore<KEY, VALUE> delete(KEY elem) {
-        BTreeIterator<KEY, VALUE> toDelete = at(elem).iterator();
-        BTreeStore<KEY, VALUE> result = this;
-        if (toDelete.hasNext()) {
-            result = removeFromTree(toDelete.curr, toDelete.index);
-            if (result == null) {
-                result = this;
-            }
-        }
-        return result;
+        return delete(elem, true);
     }
 
     /**
@@ -456,13 +595,25 @@ public class BTreeStore<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
     }
 
     // class that stores invariant information that is constant for the BTree
-    private static class BTreeInformation<KEY> {
+    private static class BTreeInformation<KEY, VALUE> {
         private final int maxNumPointers;
         private final Comparator<? super KEY> comparator;
+        private final Serializer<KEY> keySerializer;
+        private final Serializer<VALUE> valueSerializer;
+        private File file;
 
-        public BTreeInformation(int minNumPointers, Comparator<? super KEY> comparator) {
+        public BTreeInformation(int minNumPointers, Comparator<? super KEY> comparator,
+                                Serializer<KEY> keySerializer, Serializer<VALUE> valueSerializer, File file) {
             this.maxNumPointers = 2 * minNumPointers;
             this.comparator = comparator;
+            this.keySerializer = keySerializer;
+            this.valueSerializer = valueSerializer;
+            this.file = file;
+        }
+
+        public BTreeInformation(int minNumPointers, Comparator<? super KEY> comparator,
+                                Serializer<KEY> keySerializer, Serializer<VALUE> valueSerializer, String filename) {
+            this(minNumPointers, comparator, keySerializer, valueSerializer, new File(filename));
         }
     }
 }

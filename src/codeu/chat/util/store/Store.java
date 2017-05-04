@@ -98,6 +98,12 @@ public final class Store<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
     return new LinkIterable<KEY, VALUE>(comparator, ceiling(start), floor(end));
   }
 
+  @Override
+  public boolean update(KEY key, VALUE value) {
+    //no-op since not persistent
+    return false;
+  }
+
   private StoreLink<KEY, VALUE> first() {
     return extract(index.firstEntry());
   }
