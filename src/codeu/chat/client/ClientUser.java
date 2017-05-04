@@ -22,12 +22,15 @@ import java.util.Map;
 import codeu.chat.common.User;
 import codeu.chat.common.Uuid;
 import codeu.chat.util.Logger;
+import codeu.chat.util.Serializers;
 import codeu.chat.util.store.BTreeStore;
 //import codeu.chat.client.Password;
 
 public final class ClientUser {
 
   private final static Logger.Log LOG = Logger.newLog(ClientUser.class);
+
+  private static final String STORE_FILENAME = "ClientUser_StringUser.log";
 
   private static final Collection<Uuid> EMPTY = Arrays.asList(new Uuid[0]);
   private final Controller controller;
@@ -39,7 +42,8 @@ public final class ClientUser {
 
   // This is the set of users known to the server, sorted by name.
   public static BTreeStore<String, User> usersByName
-      = new BTreeStore<>(BTreeStore.NUM_POINTERS, String.CASE_INSENSITIVE_ORDER);
+      = new BTreeStore<>(BTreeStore.NUM_POINTERS, String.CASE_INSENSITIVE_ORDER, Serializers.STRING, User.SERIALIZER,
+      STORE_FILENAME);
 
   public ClientUser(Controller controller, View view) {
     this.controller = controller;
@@ -149,7 +153,7 @@ public final class ClientUser {
 
   public void updateUsers() {
     usersById.clear();
-    usersByName = new BTreeStore<>(BTreeStore.NUM_POINTERS, String.CASE_INSENSITIVE_ORDER);
+    usersByName.clear(STORE_FILENAME);
 
     for (final User user : view.getUsersExcluding(EMPTY)) {
       usersById.put(user.id, user);

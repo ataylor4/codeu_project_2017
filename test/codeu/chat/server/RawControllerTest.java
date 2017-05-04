@@ -15,6 +15,8 @@
 package codeu.chat.server;
 
 import static org.junit.Assert.*;
+
+import org.junit.After;
 import org.junit.Test;
 import org.junit.Before;
 
@@ -25,6 +27,8 @@ import codeu.chat.common.Time;
 import codeu.chat.common.User;
 import codeu.chat.common.Uuid;
 import codeu.chat.common.Uuids;
+
+import java.io.File;
 
 public final class RawControllerTest {
 
@@ -47,10 +51,21 @@ public final class RawControllerTest {
     messageId = newTestId(3);
   }
 
+  @After
+  public void cleanUp() {
+    String[] filenames = {"Model_StringConversation.log", "Model_StringMessage.log", "Model_StringUser.log",
+        "Model_TimeConversation.log", "Model_TimeMessage.log", "Model_TimeUser.log",
+        "Model_UuidConversation.log", "Model_UuidMessage.log", "Model_UuidUser.log"};
+    for (String filename : filenames) {
+      File toDelete = new File(filename);
+      toDelete.delete();
+    }
+  }
+
   @Test
   public void testAddUser() {
 
-    final User user = controller.newUser(userId, "user", Time.now(), null);
+    final User user = controller.newUser(userId, "user", Time.now(), "p1$p2$p3");
 
     assertFalse(
         "Check that user has a valid reference",
@@ -79,7 +94,7 @@ public final class RawControllerTest {
   @Test
   public void testAddConversation() {
 
-    final User user = controller.newUser(userId, "user", Time.now(), null);
+    final User user = controller.newUser(userId, "user", Time.now(), "p1$p2$p3");
 
     assertFalse(
         "Check that user has a valid reference",
@@ -134,7 +149,7 @@ public final class RawControllerTest {
   @Test
   public void testAddMessage() {
 
-    final User user = controller.newUser(userId, "user", Time.now(), null);
+    final User user = controller.newUser(userId, "user", Time.now(), "p1$p2$p3");
 
     assertFalse(
         "Check that user has a valid reference",

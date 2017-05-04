@@ -43,7 +43,7 @@ public final class User {
           Uuids.SERIALIZER.read(in),
           Serializers.STRING.read(in),
           Time.SERIALIZER.read(in),
-              Serializers.STRING.read(in)
+          Serializers.STRING.read(in)
       );
 
     }
