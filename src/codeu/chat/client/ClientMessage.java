@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.io.*;
 
 import codeu.chat.common.Conversation;
 import codeu.chat.common.ConversationSummary;
@@ -26,6 +27,8 @@ import codeu.chat.common.Uuid;
 import codeu.chat.common.Uuids;
 import codeu.chat.util.Logger;
 import codeu.chat.util.Method;
+import codeu.chat.util.store.BTreeStore;
+import codeu.chat.util.store.BTreeIterator;
 
 public final class ClientMessage {
 
@@ -249,8 +252,41 @@ public final class ClientMessage {
     }
   }
 
+  public static void printMessageFriendly(ConversationSummary conversation, Message m, ClientUser userContext) {
+    if (m == null) {
+      System.out.println("Null message.");
+    } else {
+
+      // Display author name if available.  Otherwise display the author UUID.
+      final String authorName = (userContext == null) ? ClientUser.usersById.get(m.author).name : userContext.getName(m.author);
+
+      System.out.format(" Author: [%s]   Conversation:  [%s]  Created: [%s]\n   Body: %s\n",
+              (authorName == null) ? "" : authorName, conversation.title,  m.creation, m.content);
+    }
+  }
   // Print Message outside of user context.
   public static void printMessage(Message m) {
     printMessage(m, null);
+  }
+
+  public void searchMessage(String words){
+    boolean found=false;
+    ClientUser user = new ClientUser(controller, view);
+    user.updateUsers();
+    ClientConversation conversation=new ClientConversation(controller, view, null);//not the best implementation
+    conversation.updateAllConversations(false);
+    updateMessages(false);
+    BTreeIterator<String, ConversationSummary> conversations = ClientConversation.summariesSortedByTitle.all().iterator();
+    while(conversations.hasNext()) {
+      ConversationSummary summary=conversations.next();
+      updateMessages(summary, true);
+      for (Message message : conversationContents) {
+        if (message.content.toLowerCase().contains(words.toLowerCase())) {
+          found = true;
+          printMessageFriendly(summary, message, null);
+        }
+      }
+    }
+      if(!found) System.out.println("phrase not found");
   }
 }

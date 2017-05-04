@@ -20,10 +20,12 @@ import java.util.Map;
 
 import codeu.chat.common.Conversation;
 import codeu.chat.common.ConversationSummary;
+import codeu.chat.client.ClientUser;
 import codeu.chat.common.Uuid;
 import codeu.chat.util.Logger;
 import codeu.chat.util.Method;
 import codeu.chat.util.store.BTreeStore;
+import codeu.chat.util.store.BTreeIterator;
 
 public final class ClientConversation {
 
@@ -42,7 +44,7 @@ public final class ClientConversation {
   private final Map<Uuid, ConversationSummary> summariesByUuid = new HashMap<>();
 
   // This is the set of conversations known to the server, sorted by title.
-  private BTreeStore<String, ConversationSummary> summariesSortedByTitle =
+  public static BTreeStore<String, ConversationSummary> summariesSortedByTitle =
       new BTreeStore<>(BTreeStore.NUM_POINTERS, String.CASE_INSENSITIVE_ORDER);
 
   public ClientConversation(Controller controller, View view, ClientUser userContext) {
@@ -191,15 +193,41 @@ public final class ClientConversation {
     if (c == null) {
       System.out.println("Null conversation");
     } else {
-      final String name = (userContext == null) ? null : userContext.getName(c.owner);
-      final String ownerName = (name == null) ? "" : String.format(" (%s)", name);
+      final String name = (userContext == null) ? ClientUser.usersById.get(c.owner).name : userContext.getName(c.owner);
+      final String ownerName = (name == null) ? "" : String.format(" %s", name);
       System.out.format(" Title: %s\n", c.title);
-      System.out.format("    Id: %s owner: %s%s created %s\n", c.id, c.owner, ownerName, c.creation);
+      System.out.format("    Id: %s owner: %s owner name: %s created %s\n", c.id, c.owner, c.creation);
     }
   }
 
+  public static void printConversationFriendly(ConversationSummary c) {
+    if (c == null) {
+      System.out.println("Null conversation");
+    } else {
+      final String name = ClientUser.usersById.get(c.owner).name;
+      final String ownerName = String.format("%s", name);
+      System.out.format(" Title: %s\n", c.title);
+      System.out.format("    Id: %s Owner:[%s]  created [%s]\n", c.id, ownerName, c.creation);
+    }
+  }
   // Print Conversation outside of User context.
   public static void printConversation(ConversationSummary c) {
     printConversation(c, null);
+  }
+
+  public  void searchConversation(String title){
+    ClientUser user = new ClientUser(controller, view);
+    user.updateUsers();
+    updateAllConversations(false);
+    BTreeIterator<String, ConversationSummary> conversations = summariesSortedByTitle.all().iterator();
+    boolean found=false;
+    while(conversations.hasNext()){
+      ConversationSummary summary=conversations.next();
+      if(title.equalsIgnoreCase(summary.title)) {
+        ClientConversation.printConversationFriendly(summary);
+        found=true;
+      }
+    }
+    if(!found) System.out.println("Conversation not found");
   }
 }

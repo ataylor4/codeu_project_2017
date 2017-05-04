@@ -20,9 +20,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 import codeu.chat.common.User;
+import codeu.chat.client.ClientConversation;
+import codeu.chat.client.ClientContext;
 import codeu.chat.common.Uuid;
+import codeu.chat.common.Uuids;
 import codeu.chat.util.Logger;
 import codeu.chat.util.store.BTreeStore;
+import java.util.Iterator;
+import codeu.chat.util.store.BTreeStore;
+import codeu.chat.util.store.BTreeIterator;
+import codeu.chat.common.ConversationSummary;
 //import codeu.chat.client.Password;
 
 public final class ClientUser {
@@ -35,7 +42,7 @@ public final class ClientUser {
 
   private User current = null;
 
-  private final Map<Uuid, User> usersById = new HashMap<>();
+  public static final Map<Uuid, User> usersById = new HashMap<>();
 
   // This is the set of users known to the server, sorted by name.
   public static BTreeStore<String, User> usersByName
@@ -147,7 +154,8 @@ public final class ClientUser {
 
     for (final User user : view.getUsersExcluding(EMPTY)) {
       usersById.put(user.id, user);
-      usersByName.insert(user.name, user, true);
+     // usersByName.insert(user.name, user, true);
+      usersByName = usersByName.insert(user.name, user, true);
     }
   }
 
@@ -164,4 +172,22 @@ public final class ClientUser {
   public static void printUser(User user) {
     System.out.println(getUserInfoString(user));
   }
+
+  public  void searchUser(String name){
+    updateUsers();
+    User user=usersByName.first(name);
+    if(user==null) System.out.format("%s does not exist \n", name);
+    else{
+      System.out.println(getUserInfoString(user));
+      System.out.println("Conversations:");
+      ClientConversation conversation=new ClientConversation(controller, view, null);//not the best implementation
+      conversation.updateAllConversations(false);
+      BTreeIterator<String, ConversationSummary> conversations = ClientConversation.summariesSortedByTitle.all().iterator();
+      while(conversations.hasNext()){
+        ConversationSummary summary=conversations.next();
+        if(Uuids.equals(summary.owner, user.id)) ClientConversation.printConversationFriendly(summary);
+      }
+    }
+  }
 }
+
