@@ -22,6 +22,7 @@ import codeu.chat.client.View;
 import codeu.chat.common.ConversationSummary;
 import codeu.chat.util.Logger;
 import codeu.chat.client.Password;
+import codeu.chat.client.ClientConversation;
 
 // Chat - top-level client application.
 public final class Chat {
@@ -51,16 +52,19 @@ public final class Chat {
     System.out.println("   current   - show current user, conversation, message.");
     System.out.println("User commands:");
     System.out.println("   u-add <name>  - add a new user.");
+    System.out.println("   u-search <name>   - Display user Profile");
     System.out.println("   u-remove <name> - delete an existing user.");
     System.out.println("   u-list-all    - list all users known to system.");
     System.out.println("Conversation commands:");
     System.out.println("   c-add <title>    - add a new conversation.");
     System.out.println("   c-remove <title> - delete an existing conversation.");
+    System.out.println("   c-search <title>   - Search conversation");
     System.out.println("   c-list-all       - list all conversations known to system.");
     System.out.println("   c-select <index> - select conversation from list.");
     System.out.println("Message commands:");
     System.out.println("   m-add <body>     - add a new message to the current conversation.");
     System.out.println("   m-remove <index>  - delete an existing message from the current conversation.");
+    System.out.println("   m-search <phrase>    - Search for that phrase in messages.");
     System.out.println("   m-list-all       - list all messages in the current conversation.");
     System.out.println("   m-next <index>   - index of next message to view.");
     System.out.println("   m-show <count>   - show next <count> messages.");
@@ -116,7 +120,15 @@ public final class Chat {
         addUser(tokenScanner.nextLine().trim());
       }
 
-    } else if (token.equals("u-remove")) {
+    } else if(token.equals("u-search")){
+      if (!tokenScanner.hasNext()) {
+        System.out.println("ERROR: Username not supplied.");
+      } else{
+        searchUser(tokenScanner.nextLine().trim());
+      }
+    }
+
+    else if (token.equals("u-remove")) {
       if (!tokenScanner.hasNext()) {
         System.out.println("ERROR: Username not supplied.");
       } else {
@@ -154,7 +166,17 @@ public final class Chat {
 
       clientContext.conversation.showAllConversations();
 
-    } else if (token.equals("c-select")) {
+    } else if(token.equals("c-search")) {
+      if (!tokenScanner.hasNext()) {
+        System.out.println("ERROR: Conversation title not supplied.");
+      }
+      else{
+        final String title = tokenScanner.nextLine().trim();
+        clientContext.conversation.searchConversation(title);
+      }
+    }
+
+    else if (token.equals("c-select")) {
 
       selectConversation(lineScanner);
 
@@ -173,7 +195,15 @@ public final class Chat {
                   tokenScanner.nextLine().trim());
         }
       }
-    } else if (token.equals("m-remove")) {
+    } else if(token.equals("m-search")){
+        if (!tokenScanner.hasNext()) {
+          System.out.println("ERROR: Phrase to search not supplied.");
+        } else {
+          clientContext.message.searchMessage(tokenScanner.nextLine().trim());
+        }
+    }
+
+    else if (token.equals("m-remove")) {
       if (!clientContext.user.hasCurrent()) {
         System.out.println("ERROR: Not signed in.");
       } else if (!clientContext.conversation.hasCurrent()) {
@@ -231,7 +261,6 @@ public final class Chat {
     }
     else System.out.format("%s signed in\n", name);
   }
-
   // Sign out a user.
   private void signOutUser() {
     if (!clientContext.user.signOutUser()) {
@@ -303,6 +332,8 @@ public final class Chat {
     clientContext.user.addUser(name, Password.promptForPassword(name));
   }
 
+//search for a user profile
+  private void searchUser(String name){ clientContext.user.searchUser(name);}
   // Delete an existing user.
   private void removeUser(String name) {
     clientContext.user.removeUser(name);

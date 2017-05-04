@@ -335,7 +335,7 @@ public final class UserPanel extends JPanel {
         }
     }
 
-    private final void recoverPassword(String data, DefaultListModel<String> listModel) {
+    private void recoverPassword(String data, DefaultListModel<String> listModel) {
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints constraints_two = new GridBagConstraints();
         constraints_two.anchor = GridBagConstraints.WEST;
@@ -375,7 +375,7 @@ public final class UserPanel extends JPanel {
             String[] securityDetails=ClientUser.usersByName.first(data).security.split("\\$");
             if (securityDetails[3].equals(securityQuestion)){//questions match
                 if(Password.passedsecurityTestGUI(data, answer)) {
-                    //delete old password
+                   // ClientContext.user.removeUser(data);
                     createPasswordInputDialog(listModel, 1);
                     JOptionPane.showMessageDialog(panel, "Password Successfully Changed!", "PASSWORD STRENGTH", JOptionPane.INFORMATION_MESSAGE);
                 }
