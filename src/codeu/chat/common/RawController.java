@@ -39,4 +39,11 @@ public interface RawController {
   // already in use, the call will fail and null will be returned.
   Conversation newConversation(Uuid id, String title, Uuid owner, Time creationTime);
 
+  void removeUser(User user);
+
+  void removeConversation(Conversation conversation);
+
+  void removeMessage(Message message);
+
+
 }

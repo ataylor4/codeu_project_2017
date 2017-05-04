@@ -110,6 +110,11 @@ public final class Controller implements RawController, BasicController {
   }
 
   @Override
+  public void removeMessage(Message message) {
+    model.remove(message);
+  }
+
+  @Override
   public User newUser(Uuid id, String name, Time creationTime, String security) {
 
     User user = null;
@@ -140,6 +145,11 @@ public final class Controller implements RawController, BasicController {
   }
 
   @Override
+  public void removeUser(User user) {
+    model.remove(user);
+  }
+
+  @Override
   public Conversation newConversation(Uuid id, String title, Uuid owner, Time creationTime) {
 
     final User foundOwner = model.userById().first(owner);
@@ -154,6 +164,11 @@ public final class Controller implements RawController, BasicController {
     }
 
     return conversation;
+  }
+
+  @Override
+  public void removeConversation(Conversation conversation) {
+    model.remove(conversation);
   }
 
   private Uuid createId() {

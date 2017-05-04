@@ -75,10 +75,12 @@ public final class ConversationPanel extends JPanel {
 
     final JButton updateButton = new JButton("Update");
     final JButton addButton = new JButton("Add");
+    final JButton removeButton = new JButton("Remove");
 
     updateButton.setAlignmentX(Component.LEFT_ALIGNMENT);
     buttonPanel.add(updateButton);
     buttonPanel.add(addButton);
+    buttonPanel.add(removeButton);
 
     // Put panels together
     titlePanelC.gridx = 0;

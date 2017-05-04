@@ -23,6 +23,7 @@ import javax.swing.event.ListSelectionListener;
 import java.util.Arrays;
 
 import codeu.chat.client.ClientContext;
+import codeu.chat.common.ConversationSummary;
 import codeu.chat.common.User;
 import codeu.chat.client.Password;
 import codeu.chat.client.ClientUser;
@@ -103,11 +104,15 @@ public final class UserPanel extends JPanel {
         final JButton userUpdateButton = new JButton("Update");
         final JButton userSignInButton = new JButton("Sign In");
         final JButton userAddButton = new JButton("Add");
+        final JButton userRemoveButton = new JButton("Remove");
+
         // final
 
         buttonPanel.add(userUpdateButton);
         buttonPanel.add(userSignInButton);
         buttonPanel.add(userAddButton);
+        buttonPanel.add(userRemoveButton);
+
 
         // Placement of title, list panel, buttons, and current user panel.
         titlePanelC.gridx = 0;
@@ -150,6 +155,8 @@ public final class UserPanel extends JPanel {
                 UserPanel.this.getAllUsers(listModel);
             }
         });
+
+
 
         userSignInButton.addActionListener(new ActionListener() {
             @Override
@@ -210,8 +217,6 @@ public final class UserPanel extends JPanel {
             }
         });
 
-
-
         userList.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
@@ -235,9 +240,6 @@ public final class UserPanel extends JPanel {
         }
     }
 
-
-    //  });
-    // }
     private void createPasswordInputDialog(DefaultListModel<String> listModel, int mode) {
         while (true) {
             JPanel panel = new JPanel(new GridBagLayout());

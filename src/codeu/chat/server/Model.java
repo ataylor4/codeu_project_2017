@@ -90,6 +90,12 @@ public final class Model {
     userByText = userByText.insert(user.name, user, true);
   }
 
+  public void remove(User user) {
+    userById = userById.delete(user.id);
+    userByTime = userByTime.delete(user.creation);
+    userByText = userByText.delete(user.name);
+  }
+
   public StoreAccessor<Uuid, User> userById() {
     return userById;
   }
@@ -112,6 +118,12 @@ public final class Model {
     conversationByText = conversationByText.insert(conversation.title, conversation, true);
   }
 
+  public void remove(Conversation conversation) {
+    conversationById = conversationById.delete(conversation.id);
+    conversationByTime = conversationByTime.delete(conversation.creation);
+    conversationByText = conversationByText.delete(conversation.title);
+  }
+
   public StoreAccessor<Uuid, Conversation> conversationById() {
     return conversationById;
   }
@@ -128,6 +140,12 @@ public final class Model {
     messageById = messageById.insert(message.id, message, false);
     messageByTime = messageByTime.insert(message.creation, message, true);
     messageByText = messageByText.insert(message.content, message, true);
+  }
+
+  public void remove(Message message) {
+    messageById = messageById.delete(message.id);
+    messageByTime = messageByTime.delete(message.creation);
+    messageByText = messageByText.delete(message.content);
   }
 
   public StoreAccessor<Uuid, Message> messageById() {

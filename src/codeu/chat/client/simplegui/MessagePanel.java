@@ -54,7 +54,8 @@ public final class MessagePanel extends JPanel {
             ((owningConversation==null) ? "" : owningConversation.owner) :
             u.name));
 
-    messageConversationLabel.setText("Conversation: " + owningConversation.title);
+    messageConversationLabel.setText("Conversation: " +
+            ((owningConversation==null) ? "" : owningConversation.title));
 
     getAllMessages(owningConversation);
   }
@@ -116,7 +117,9 @@ public final class MessagePanel extends JPanel {
     final GridBagConstraints buttonPanelC = new GridBagConstraints();
 
     final JButton addButton = new JButton("Add");
+    final JButton removeButton = new JButton("Remove");
     buttonPanel.add(addButton);
+    buttonPanel.add(removeButton);
 
     // Placement of title, list panel, buttons, and current user panel.
     titlePanelC.gridx = 0;
