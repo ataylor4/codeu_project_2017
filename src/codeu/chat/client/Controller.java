@@ -66,6 +66,25 @@ public class Controller implements BasicController {
   }
 
   @Override
+  public void removeMessage(Message message) {
+
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.REMOVE_MESSAGE_REQUEST);
+      Message.SERIALIZER.write(connection.out(), message);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.REMOVE_MESSAGE_RESPONSE) {
+        LOG.info("removeMessage: Response completed.");
+      } else {
+        LOG.error("Response from server failed.");
+      }
+    } catch (Exception ex) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(ex, "Exception during call on server.");
+    }
+  }
+
+  @Override
   public User newUser(String name, String security) {
 
     User response = null;
@@ -92,6 +111,28 @@ public class Controller implements BasicController {
   }
 
   @Override
+  public void removeUser(User user) {
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.REMOVE_USER_REQUEST);
+      User.SERIALIZER.write(connection.out(), user);
+
+      System.out.println("removeUser: Request completed.");
+      LOG.info("removeUser: Request completed.");
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.REMOVE_USER_RESPONSE) {
+        LOG.info("removeUser: Response completed.");
+      } else {
+        LOG.error("Response from server failed.");
+      }
+    } catch (Exception ex) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(ex, "Exception during call on server.");
+    }
+
+  }
+
+  @Override
   public Conversation newConversation(String title, Uuid owner)  {
 
     Conversation response = null;
@@ -113,5 +154,24 @@ public class Controller implements BasicController {
     }
 
     return response;
+  }
+
+  @Override
+  public void removeConversation(Conversation conversation)  {
+
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.REMOVE_CONVERSATION_REQUEST);
+      Conversation.SERIALIZER.write(connection.out(), conversation);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.REMOVE_CONVERSATION_RESPONSE) {
+        LOG.info("removeConversation: Response completed.");
+      } else {
+        LOG.error("Response from server failed.");
+      }
+    } catch (Exception ex) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(ex, "Exception during call on server.");
+    }
   }
 }

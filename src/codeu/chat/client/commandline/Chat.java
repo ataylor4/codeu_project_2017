@@ -210,7 +210,7 @@ public final class Chat {
         System.out.println("ERROR: No conversation selected.");
       } else {
         if (!tokenScanner.hasNext()) {
-          System.out.println("ERROR: Message body not supplied.");
+          System.out.println("ERROR: Message index not supplied.");
         } else {
           clientContext.message.removeMessage(tokenScanner.nextLine().trim());
         }
