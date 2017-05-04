@@ -205,9 +205,25 @@ public final class Server {
 
       Serializers.INTEGER.write(out, NetworkCode.GET_MESSAGES_BY_RANGE_RESPONSE);
       Serializers.collection(Message.SERIALIZER).write(out, messages);
+    } else if (type == NetworkCode.REMOVE_USER_REQUEST) {
+
+      final User user = User.SERIALIZER.read(in);
+      controller.removeUser(user);
+      Serializers.INTEGER.write(out, NetworkCode.REMOVE_USER_RESPONSE);
+
+    } else if (type == NetworkCode.REMOVE_CONVERSATION_REQUEST) {
+
+      final Conversation conversation = Conversation.SERIALIZER.read(in);
+      controller.removeConversation(conversation);
+      Serializers.INTEGER.write(out, NetworkCode.REMOVE_CONVERSATION_RESPONSE);
+
+    } else if (type == NetworkCode.REMOVE_MESSAGE_REQUEST) {
+
+      final Message message = Message.SERIALIZER.read(in);
+      controller.removeMessage(message);
+      Serializers.INTEGER.write(out, NetworkCode.REMOVE_MESSAGE_RESPONSE);
 
     } else {
-
       // In the case that the message was not handled make a dummy message with
       // the type "NO_MESSAGE" so that the client still gets something.
 
@@ -228,6 +244,8 @@ public final class Server {
 
     if (user == null) {
       user = controller.newUser(relayUser.id(), relayUser.text(), relayUser.time(), relayUser.security());
+    } else {
+      controller.removeUser(user);
     }
 
     Conversation conversation = model.conversationById().first(relayConversation.id());
@@ -241,6 +259,8 @@ public final class Server {
                                                 relayConversation.text(),
                                                 user.id,
                                                 relayConversation.time());
+    } else {
+      controller.removeConversation(conversation);
     }
 
     Message message = model.messageById().first(relayMessage.id());
@@ -251,6 +271,8 @@ public final class Server {
                                       conversation.id,
                                       relayMessage.text(),
                                       relayMessage.time());
+    } else {
+      controller.removeMessage(message);
     }
   }
 

@@ -51,6 +51,8 @@ public final class ClientUser {
     boolean clean = true;
     if (userName.length() == 0) {
       clean = false;
+    } else if (usersByName.first(userName) != null) {
+      clean = false;
     } else {
 
       clean=userName.matches("[A-Za-z0-9_ @]+");
@@ -109,8 +111,12 @@ public final class ClientUser {
   // For u-remove command.
   public void removeUser(String name) {
 
+
     User user = usersByName.first(name);
+    controller.removeUser(user);
     usersById.remove(user.id);
+    usersByName.delete(name);
+    updateUsers();
     System.out.format("User removed, Name= \"%s\"\n", name);
     LOG.info("User removed, Name= \"%s\"\n", name);
 
@@ -147,7 +153,7 @@ public final class ClientUser {
 
     for (final User user : view.getUsersExcluding(EMPTY)) {
       usersById.put(user.id, user);
-      usersByName.insert(user.name, user, true);
+      usersByName = usersByName.insert(user.name, user, true);
     }
   }
 

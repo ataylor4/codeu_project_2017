@@ -15,24 +15,23 @@
 package codeu.chat.server;
 
 import static org.junit.Assert.*;
+
+import codeu.chat.common.*;
 import org.junit.Test;
 import org.junit.Before;
-
-import codeu.chat.common.BasicController;
-import codeu.chat.common.Conversation;
-import codeu.chat.common.Message;
-import codeu.chat.common.User;
-import codeu.chat.common.Uuids;
 
 public final class BasicControllerTest {
 
   private Model model;
   private BasicController controller;
+  private View view;
 
   @Before
   public void doBefore() {
     model = new Model();
     controller = new Controller(Uuids.NULL, model);
+    view = new View(model);
+
   }
 
   @Test
@@ -43,6 +42,21 @@ public final class BasicControllerTest {
     assertFalse(
         "Check that user has a valid reference",
         user == null);
+
+  }
+
+  @Test
+  public void testRemoveUser() {
+
+    final User user = controller.newUser("user", null);
+
+    assertFalse(
+            "Check that user has a valid reference",
+            user == null);
+
+    controller.removeUser(user);
+    assertFalse(view.findUser(user.id) != null);
+
   }
 
   @Test
@@ -61,6 +75,29 @@ public final class BasicControllerTest {
     assertFalse(
         "Check that conversation has a valid reference",
         conversation == null);
+
+  }
+
+  @Test
+  public void testRemoveConversation() {
+
+    final User user = controller.newUser("user", null);
+
+    assertFalse(
+            "Check that user has a valid reference",
+            user == null);
+
+    final Conversation conversation = controller.newConversation(
+            "conversation",
+            user.id);
+
+    assertFalse(
+            "Check that conversation has a valid reference",
+            conversation == null);
+
+    controller.removeConversation(conversation);
+    assertFalse(view.findConversation(conversation.id) != null);
+
   }
 
   @Test
@@ -88,5 +125,38 @@ public final class BasicControllerTest {
     assertFalse(
         "Check that the message has a valid reference",
         message == null);
+
   }
+
+  @Test
+  public void testRemoveMessage() {
+
+    final User user = controller.newUser("user", null);
+
+    assertFalse(
+            "Check that user has a valid reference",
+            user == null);
+
+    final Conversation conversation = controller.newConversation(
+            "conversation",
+            user.id);
+
+    assertFalse(
+            "Check that conversation has a valid reference",
+            conversation == null);
+
+    final Message message = controller.newMessage(
+            user.id,
+            conversation.id,
+            "Hello World");
+
+    assertFalse(
+            "Check that the message has a valid reference",
+            message == null);
+
+    controller.removeMessage(message);
+    assertFalse(view.findMessage(message.id) != null);
+
+  }
+
 }

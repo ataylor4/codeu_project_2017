@@ -115,7 +115,11 @@ public final class ClientMessage {
   // For m-remove command.
   public void removeMessage(String stringIndex) {
     int index = Integer.parseInt(stringIndex);
-    conversationContents.remove(index);
+
+    Message message = conversationContents.get(index);
+    controller.removeMessage(message);
+    conversationContents.remove(message);
+    updateMessages(conversationContext.getCurrent(), true);
     LOG.info("Message removed: Index= \"%s\"\n", stringIndex);
     System.out.format("Message removed: Index= \"%s\"\n", stringIndex);
   }

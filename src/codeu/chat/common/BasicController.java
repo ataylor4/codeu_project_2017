@@ -49,4 +49,11 @@ public interface BasicController {
   //  Whether conversations can have the same title is undefined.
   Conversation newConversation(String title, Uuid owner);
 
+  void removeUser(User user);
+
+  void removeConversation(Conversation conversation);
+
+  void removeMessage(Message message);
+
+
 }

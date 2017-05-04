@@ -30,6 +30,7 @@ public final class RawControllerTest {
 
   private Model model;
   private RawController controller;
+  private View view;
 
   private Uuid userId;
   private Uuid conversationId;
@@ -39,6 +40,7 @@ public final class RawControllerTest {
   public void doBefore() {
     model = new Model();
     controller = new Controller(Uuids.NULL, model);
+    view = new View(model);
 
     userId = newTestId(1);
     conversationId = newTestId(2);
@@ -56,6 +58,22 @@ public final class RawControllerTest {
     assertTrue(
         "Check that the user has the correct id",
         Uuids.equals(user.id, userId));
+  }
+
+  @Test
+  public void testRemoveUser() {
+
+    final User user = controller.newUser(userId, "user", Time.now(), null);
+
+    assertFalse(
+            "Check that user has a valid reference",
+            user == null);
+    assertTrue(
+            "Check that the user has the correct id",
+            Uuids.equals(user.id, userId));
+
+    controller.removeUser(user);
+    assertFalse(view.findUser(user.id) != null);
   }
 
   @Test
@@ -82,6 +100,35 @@ public final class RawControllerTest {
     assertTrue(
         "Check that the conversation has the correct id",
         Uuids.equals(conversation.id, conversationId));
+  }
+
+  @Test
+  public void testRemoveConversation() {
+
+    final User user = controller.newUser(userId, "user", Time.now(), null);
+
+    assertFalse(
+            "Check that user has a valid reference",
+            user == null);
+    assertTrue(
+            "Check that the user has the correct id",
+            Uuids.equals(user.id, userId));
+
+    final Conversation conversation = controller.newConversation(
+            conversationId,
+            "conversation",
+            user.id,
+            Time.now());
+
+    assertFalse(
+            "Check that conversation has a valid reference",
+            conversation == null);
+    assertTrue(
+            "Check that the conversation has the correct id",
+            Uuids.equals(conversation.id, conversationId));
+
+    controller.removeConversation(conversation);
+    assertFalse(view.findConversation(conversation.id) != null);
   }
 
   @Test
@@ -122,6 +169,49 @@ public final class RawControllerTest {
     assertTrue(
         "Check that the message has the correct id",
         Uuids.equals(message.id, messageId));
+  }
+
+  @Test
+  public void testRemoveMessage() {
+
+    final User user = controller.newUser(userId, "user", Time.now(), null);
+
+    assertFalse(
+            "Check that user has a valid reference",
+            user == null);
+    assertTrue(
+            "Check that the user has the correct id",
+            Uuids.equals(user.id, userId));
+
+    final Conversation conversation = controller.newConversation(
+            conversationId,
+            "conversation",
+            user.id,
+            Time.now());
+
+    assertFalse(
+            "Check that conversation has a valid reference",
+            conversation == null);
+    assertTrue(
+            "Check that the conversation has the correct id",
+            Uuids.equals(conversation.id, conversationId));
+
+    final Message message = controller.newMessage(
+            messageId,
+            user.id,
+            conversation.id,
+            "Hello World",
+            Time.now());
+
+    assertFalse(
+            "Check that the message has a valid reference",
+            message == null);
+    assertTrue(
+            "Check that the message has the correct id",
+            Uuids.equals(message.id, messageId));
+
+    controller.removeMessage(message);
+    assertFalse(view.findMessage(message.id) != null);
   }
 
   private static Uuid newTestId(final int id) {
