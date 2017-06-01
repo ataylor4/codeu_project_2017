@@ -53,7 +53,7 @@ public interface BasicController {
 
   void removeConversation(Conversation conversation);
 
-  void removeMessage(Message message);
+  void removeMessage(Message message, Uuid conversation);
 
 
 }

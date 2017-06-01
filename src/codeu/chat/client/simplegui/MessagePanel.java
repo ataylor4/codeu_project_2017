@@ -171,6 +171,30 @@ public final class MessagePanel extends JPanel {
       }
     });
 
+    // User click Messages Remove button
+    removeButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+
+        if (!clientContext.user.hasCurrent()) {
+          JOptionPane.showMessageDialog(MessagePanel.this, "Error: must be signed in to remove user!", "Error", JOptionPane.ERROR_MESSAGE);
+          return;
+        } else if (!clientContext.conversation.hasCurrent()) {
+          JOptionPane.showMessageDialog(MessagePanel.this, "You must select a conversation.", "Error", JOptionPane.ERROR_MESSAGE);
+          return;
+        } else {
+          Message requestedDeletion = clientContext.message.getConversationContents(clientContext.conversation.getCurrent()).get(userList.getSelectedIndex());
+          if (!requestedDeletion.author.equals(clientContext.user.getCurrent().id)) {
+              JOptionPane.showMessageDialog(MessagePanel.this, "Error: must be author of message to remove!", "Error", JOptionPane.ERROR_MESSAGE);
+              return;
+          }
+          final String data = Integer.toString(userList.getSelectedIndex());
+          clientContext.message.removeMessage(data);
+          MessagePanel.this.getAllMessages(clientContext.conversation.getCurrent());
+        }
+      }
+    });
+
     // Panel is set up. If there is a current conversation, Populate the conversation list.
     getAllMessages(clientContext.conversation.getCurrent());
   }

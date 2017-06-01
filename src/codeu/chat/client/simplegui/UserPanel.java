@@ -210,6 +210,7 @@ public final class UserPanel extends JPanel {
                 }
             }
         });
+
         userAddButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -224,6 +225,27 @@ public final class UserPanel extends JPanel {
                     final String data = userList.getSelectedValue();
                     userInfoPanel.setText(clientContext.user.showUserInfo(data));
                 }
+            }
+        });
+
+        // User clicks user remove button
+        userRemoveButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+               if (!clientContext.user.hasCurrent()) {
+                    JOptionPane.showMessageDialog(UserPanel.this, "Error: must be signed in to remove user!", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                final String data = userList.getSelectedValue();
+                if (!clientContext.user.getCurrent().name.equals(data)) {
+                    JOptionPane.showMessageDialog(UserPanel.this, "Error: cannot remove another user!", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                clientContext.user.signOutUser();
+                clientContext.user.removeUser(data);
+                userSignedInLabel.setText("not signed in");
+                userInfoPanel.setText("");
+                UserPanel.this.getAllUsers(listModel);
             }
         });
 

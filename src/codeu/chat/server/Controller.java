@@ -78,11 +78,16 @@ public final class Controller implements RawController, BasicController {
 
       } else {
         final Message lastMessage = model.messageById().first(foundConversation.lastMessage);
-        lastMessage.next = message.id;
-        model.messageById().update(foundConversation.lastMessage, lastMessage);
-        model.messageByText().update(lastMessage.content, lastMessage);
-        model.messageByTime().update(lastMessage.creation, lastMessage);
-
+        if (lastMessage != null) { // last message exists
+          message.previous = lastMessage.id;
+          lastMessage.next = message.id;
+          model.messageById().update(message.id, message);
+          model.messageByText().update(message.content, message);
+          model.messageByTime().update(message.creation, message);
+          model.messageById().update(foundConversation.lastMessage, lastMessage);
+          model.messageByText().update(lastMessage.content, lastMessage);
+          model.messageByTime().update(lastMessage.creation, lastMessage);
+        }
       }
 
       // If the first message points to NULL it means that the conversation was empty and that
@@ -110,7 +115,36 @@ public final class Controller implements RawController, BasicController {
   }
 
   @Override
-  public void removeMessage(Message message) {
+  public void removeMessage(Message message, Uuid conversation) {
+
+    final Conversation foundConversation = model.conversationById().first(conversation); // current conversation
+
+    if (message.previous.equals(Uuids.NULL)) { // first message
+      foundConversation.firstMessage = message.next;
+      model.conversationById().update(conversation, foundConversation);
+      model.conversationByText().update(foundConversation.title, foundConversation);
+      model.conversationByTime().update(foundConversation.creation, foundConversation);
+    } else if (message.next.equals(Uuids.NULL)) { // last message
+      foundConversation.lastMessage = message.previous; // should be previous message
+      model.conversationById().update(conversation, foundConversation);
+      model.conversationByText().update(foundConversation.title, foundConversation);
+      model.conversationByTime().update(foundConversation.creation, foundConversation);
+    }
+
+    if (!message.previous.equals(Uuids.NULL)) { // previous message exists
+      Message prevMessage = model.messageById().first(message.previous);
+      prevMessage.next = message.next;
+      model.messageById().update(prevMessage.id, prevMessage);
+      model.messageByText().update(prevMessage.content, prevMessage);
+      model.messageByTime().update(prevMessage.creation, prevMessage);
+    } else if (!message.next.equals(Uuids.NULL)) { // next message exists
+      Message nextMessage = model.messageById().first(message.next);
+      nextMessage.previous = message.previous;
+      model.messageById().update(nextMessage.id, nextMessage);
+      model.messageByText().update(nextMessage.content, nextMessage);
+      model.messageByTime().update(nextMessage.creation, nextMessage);
+    }
+
     model.remove(message);
   }
 
