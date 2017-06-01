@@ -225,7 +225,7 @@ public final class RawControllerTest {
             "Check that the message has the correct id",
             Uuids.equals(message.id, messageId));
 
-    controller.removeMessage(message);
+    controller.removeMessage(message, conversation.id);
     assertFalse(view.findMessage(message.id) != null);
   }
 

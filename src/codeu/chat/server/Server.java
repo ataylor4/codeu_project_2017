@@ -220,7 +220,8 @@ public final class Server {
     } else if (type == NetworkCode.REMOVE_MESSAGE_REQUEST) {
 
       final Message message = Message.SERIALIZER.read(in);
-      controller.removeMessage(message);
+      final Uuid conversation = Uuids.SERIALIZER.read(in);
+      controller.removeMessage(message, conversation);
       Serializers.INTEGER.write(out, NetworkCode.REMOVE_MESSAGE_RESPONSE);
 
     } else {
@@ -272,7 +273,7 @@ public final class Server {
                                       relayMessage.text(),
                                       relayMessage.time());
     } else {
-      controller.removeMessage(message);
+      controller.removeMessage(message, conversation.id);
     }
   }
 

@@ -122,7 +122,6 @@ public final class ClientUser {
   // For u-remove command.
   public void removeUser(String name) {
 
-
     User user = usersByName.first(name);
     controller.removeUser(user);
     usersById.remove(user.id);

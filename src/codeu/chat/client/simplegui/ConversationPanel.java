@@ -152,6 +152,35 @@ public final class ConversationPanel extends JPanel {
       }
     });
 
+    // User clicks Conversation Remove button.
+    removeButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        if (!clientContext.user.hasCurrent()) {
+          JOptionPane.showMessageDialog(ConversationPanel.this, "Error: must be signed in to remove user!", "Error", JOptionPane.ERROR_MESSAGE);
+          return;
+        }
+        final String data = objectList.getSelectedValue();
+        for (ConversationSummary s : clientContext.conversation.getConversationSummaries()) {
+          if (clientContext.conversation.getCurrent().title.equals(data)) {
+            if (!clientContext.user.getCurrent().id.equals(s.owner)) {
+              JOptionPane.showMessageDialog(ConversationPanel.this, "Error: must be owner of conversation to remove!", "Error", JOptionPane.ERROR_MESSAGE);
+              return;
+            }
+          }
+        }
+        for (int m = 0; m < clientContext.message.currentMessageCount(); m++) {
+          final String mIndex = Integer.toString(m);
+          clientContext.message.removeMessage(mIndex);
+        }
+        final ConversationSummary cs = null;
+        clientContext.conversation.setCurrent(cs);
+        messagePanel.update(cs); // only works if cs is null
+        clientContext.conversation.removeConversation(data);
+        ConversationPanel.this.getAllConversations(listModel);
+      }
+    });
+
     getAllConversations(listModel);
   }
 

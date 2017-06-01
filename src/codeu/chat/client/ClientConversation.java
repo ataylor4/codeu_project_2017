@@ -117,12 +117,10 @@ public final class ClientConversation {
       System.out.format("Error: conversation \"%s\" does not exist\n", title);
       return;
     }
-
     boolean deletingCurrent = false;
     if (cs.equals(getCurrent())) {
       deletingCurrent = true;
     }
-
     controller.removeConversation(getConversation(cs.id));
     summariesByUuid.remove(cs.id);
     updateAllConversations(deletingCurrent ? true : false);
@@ -205,10 +203,10 @@ public final class ClientConversation {
     if (c == null) {
       System.out.println("Null conversation");
     } else {
-      final String name = (userContext == null) ? ClientUser.usersById.get(c.owner).name : userContext.getName(c.owner);
+      final String name = (userContext == null) ? null : userContext.getName(c.owner);
       final String ownerName = (name == null) ? "" : String.format(" %s", name);
       System.out.format(" Title: %s\n", c.title);
-      System.out.format("    Id: %s owner: %s owner name: %s created %s\n", c.id, c.owner, c.creation);
+      System.out.format("    Id: %s owner: %s%s created %s\n", c.id, c.owner, ownerName, c.creation);
     }
   }
 

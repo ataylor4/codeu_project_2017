@@ -119,12 +119,86 @@ public final class ClientMessage {
   public void removeMessage(String stringIndex) {
     int index = Integer.parseInt(stringIndex);
 
-    Message message = conversationContents.get(index);
-    controller.removeMessage(message);
-    conversationContents.remove(message);
-    updateMessages(conversationContext.getCurrent(), true);
-    LOG.info("Message removed: Index= \"%s\"\n", stringIndex);
-    System.out.format("Message removed: Index= \"%s\"\n", stringIndex);
+    if (index >= 0 && index < conversationContents.size()) {
+      Message message = conversationContents.get(index);
+      Uuid conversation = conversationContext.getCurrent().id;
+      controller.removeMessage(message, conversation);
+      conversationContents.remove(message);
+      removeUpdates(message, index);
+      /*if (!message.previous.equals(Uuids.NULL)) {
+        Message previousMessage = conversationContents.get(index - 1);
+        previousMessage.next = message.next;
+      } else {
+        if (conversationContents.size() != 0) {
+          conversationContents.get(index).previous = Uuids.NULL;
+          conversationHead.firstMessage = conversationContents.get(index).id;
+          current = conversationContents.get(index);
+          current.next = conversationContents.get(index).next;
+        } else {
+          current = null;
+          conversationHead.firstMessage = Uuids.NULL;
+          conversationHead.lastMessage = Uuids.NULL;
+        }
+      }
+
+      if (!message.next.equals(Uuids.NULL)) {
+        Message nextMessage = conversationContents.get(index + 1);
+        nextMessage.previous = message.previous;
+      } else {
+        if (conversationContents.size() != 0) {
+          if (index == 1) {
+            current.next = Uuids.NULL;
+          }
+          conversationContents.get(index - 1).next = Uuids.NULL;
+          conversationHead.lastMessage = conversationContents.get(index - 1).id;
+        } else {
+          current = null;
+          conversationHead.firstMessage = Uuids.NULL;
+          conversationHead.lastMessage = Uuids.NULL;
+        }
+      }*/
+      updateMessages(conversationContext.getCurrent(), false);
+      LOG.info("Message removed: Index= \"%s\"\n", stringIndex);
+      System.out.format("Message removed: Index= \"%s\"\n", stringIndex);
+    } else {
+      LOG.info("Message removal failure: Invalid Index= \"%s\"\n", stringIndex);
+      System.out.format("Message removal failure: Invalid Index= \"%s\"\n", stringIndex);
+    }
+  }
+
+  private void removeUpdates(Message message, int index) {
+    if (!message.previous.equals(Uuids.NULL)) {
+      Message previousMessage = conversationContents.get(index - 1);
+      previousMessage.next = message.next;
+    } else {
+      if (conversationContents.size() != 0 && !message.next.equals(Uuids.NULL)) {
+        conversationContents.get(0).previous = Uuids.NULL;
+        conversationHead.firstMessage = conversationContents.get(index).id;
+        current = conversationContents.get(index);
+        current.next = conversationContents.get(index).next;
+      } else {
+        current = null;
+        conversationHead.firstMessage = Uuids.NULL;
+        conversationHead.lastMessage = Uuids.NULL;
+      }
+    }
+
+    if (!message.next.equals(Uuids.NULL)) {
+      Message nextMessage = conversationContents.get(index + 1);
+      nextMessage.previous = message.previous;
+    } else {
+      if (conversationContents.size() != 0) {
+        if (index == 1) {
+          current.next = Uuids.NULL;
+        }
+        conversationContents.get(index - 1).next = Uuids.NULL;
+        conversationHead.lastMessage = conversationContents.get(index - 1).id;
+      } else {
+        current = null;
+        conversationHead.firstMessage = Uuids.NULL;
+        conversationHead.lastMessage = Uuids.NULL;
+      }
+    }
   }
 
   // For m-list-all command.
@@ -208,6 +282,7 @@ public final class ClientMessage {
       LOG.error("conversation argument is null - do nothing.");
       return;
     }
+
     conversationHead = conversationContext.getConversation(conversation.id);
     if (conversationHead == null) {
       LOG.info("ConversationHead is null");
