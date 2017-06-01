@@ -125,38 +125,6 @@ public final class ClientMessage {
       controller.removeMessage(message, conversation);
       conversationContents.remove(message);
       removeUpdates(message, index);
-      /*if (!message.previous.equals(Uuids.NULL)) {
-        Message previousMessage = conversationContents.get(index - 1);
-        previousMessage.next = message.next;
-      } else {
-        if (conversationContents.size() != 0) {
-          conversationContents.get(index).previous = Uuids.NULL;
-          conversationHead.firstMessage = conversationContents.get(index).id;
-          current = conversationContents.get(index);
-          current.next = conversationContents.get(index).next;
-        } else {
-          current = null;
-          conversationHead.firstMessage = Uuids.NULL;
-          conversationHead.lastMessage = Uuids.NULL;
-        }
-      }
-
-      if (!message.next.equals(Uuids.NULL)) {
-        Message nextMessage = conversationContents.get(index + 1);
-        nextMessage.previous = message.previous;
-      } else {
-        if (conversationContents.size() != 0) {
-          if (index == 1) {
-            current.next = Uuids.NULL;
-          }
-          conversationContents.get(index - 1).next = Uuids.NULL;
-          conversationHead.lastMessage = conversationContents.get(index - 1).id;
-        } else {
-          current = null;
-          conversationHead.firstMessage = Uuids.NULL;
-          conversationHead.lastMessage = Uuids.NULL;
-        }
-      }*/
       updateMessages(conversationContext.getCurrent(), false);
       LOG.info("Message removed: Index= \"%s\"\n", stringIndex);
       System.out.format("Message removed: Index= \"%s\"\n", stringIndex);
