@@ -249,7 +249,7 @@ public final class Server implements Relay {
     } else {
 
       LOG.info(
-          "Unauthroized attempt to read from server team=%s",
+          "Unauthorized attempt to read from server team=%s",
           teamId);
     }
 

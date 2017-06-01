@@ -66,12 +66,13 @@ public class Controller implements BasicController {
   }
 
   @Override
-  public void removeMessage(Message message) {
+  public void removeMessage(Message message, Uuid conversation) {
 
     try (final Connection connection = source.connect()) {
 
       Serializers.INTEGER.write(connection.out(), NetworkCode.REMOVE_MESSAGE_REQUEST);
       Message.SERIALIZER.write(connection.out(), message);
+      Uuids.SERIALIZER.write(connection.out(), conversation);
 
       if (Serializers.INTEGER.read(connection.in()) == NetworkCode.REMOVE_MESSAGE_RESPONSE) {
         LOG.info("removeMessage: Response completed.");
