@@ -81,6 +81,9 @@ public final class Controller implements RawController, BasicController {
         if (lastMessage != null) { // last message exists
           message.previous = lastMessage.id;
           lastMessage.next = message.id;
+          model.messageById().update(message.id, message);
+          model.messageByText().update(message.content, message);
+          model.messageByTime().update(message.creation, message);
           model.messageById().update(foundConversation.lastMessage, lastMessage);
           model.messageByText().update(lastMessage.content, lastMessage);
           model.messageByTime().update(lastMessage.creation, lastMessage);
