@@ -1,10 +1,13 @@
 package codeu.chat.util.store;
 
+import codeu.chat.util.Serializer;
 import codeu.chat.util.Serializers;
 import org.junit.After;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Iterator;
 
 import static org.junit.Assert.*;
@@ -351,6 +354,38 @@ public class BTreeStoreTest {
             test = test.insert(numsToTest[i], numsToTest[i], true);
         }
         assertFalse(test.update(301, 12));
+    }
+
+    @Test
+    public void testBadInsert() {
+        try (FileOutputStream outputStream = new FileOutputStream(new File(FILENAME))) {
+
+            // write key/value 3/3 into BTree successfully
+            outputStream.write(BTreeStore.INSERTION);
+            Serializers.INTEGER.write(outputStream, 3);
+            Serializers.INTEGER.write(outputStream, 3);
+            outputStream.write(BTreeStore.SUCCESS);
+
+            // write key/value 4/4 into BTree unsuccessfully
+            outputStream.write(BTreeStore.INSERTION);
+            Serializers.INTEGER.write(outputStream, 4);
+            Serializers.INTEGER.write(outputStream, 4);
+            outputStream.write(BTreeStore.ABORT);
+
+            // write key/value 5/5 into BTree with no final bit
+            outputStream.write(BTreeStore.INSERTION);
+            Serializers.INTEGER.write(outputStream, 5);
+            Serializers.INTEGER.write(outputStream, 5);
+            outputStream.flush();
+
+            BTreeStore<Integer, Integer> test = new BTreeStore<>(2, Integer::compareTo, Serializers.INTEGER,
+                Serializers.INTEGER, FILENAME);
+            assertTrue(test.at(3).iterator().hasNext());
+            assertFalse(test.at(4).iterator().hasNext());
+            assertFalse(test.at(5).iterator().hasNext());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
