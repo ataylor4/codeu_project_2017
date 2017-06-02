@@ -1,6 +1,7 @@
 .idea/
-bin/
 *.log
 out/
+src/codeu/codeu.iml
+/bin
 codeu_project_2017.iml
 .gitignore

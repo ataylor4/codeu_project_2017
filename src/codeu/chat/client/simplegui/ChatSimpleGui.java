@@ -20,6 +20,21 @@ import javax.swing.border.Border;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.DataLine;
+import java.net.URL;
+import javax.sound.sampled.*;
+
+
+//import sun.audio.AudioPlayer;
+//import sun.audio.AudioStream;
 
 import codeu.chat.client.ClientContext;
 import codeu.chat.client.Password;
@@ -107,6 +122,8 @@ public final class ChatSimpleGui {
 
           clientContext.user.signInUser(username, 1);
 
+          playSound("welcome.wav");
+
           prepareChatPlatform();
           simplelogin.panel.setVisible(false);
           mainViewPanel.removeAll();
@@ -122,12 +139,18 @@ public final class ChatSimpleGui {
           mainFrame.pack();
 
         }
+        else{
+            simplelogin.infoLabel.setText("Incorrect Username or Password");
+            simplelogin.infoLabel.setFont(new Font("DialogInput", Font.PLAIN, 14));
+        }
       }
     });
 
     simplelogin.signupButton.addActionListener(new ActionListener(){
       @Override
       public void actionPerformed(ActionEvent e){
+
+          simplelogin.infoLabel.setText("An Amazing Chatting Experience");
           simplelogin.username.setText("Enter username:");
           simplelogin.pwdLabel.setText("Enter Password:");
 
@@ -218,6 +241,32 @@ public final class ChatSimpleGui {
           });
       }
     });
+
+  }
+
+  public static void playSound(String song){
+    InputStream in;
+    Clip clip=null;
+    try{
+      File myFile=new File(System.getProperty("user.dir") +"/../res/audio/"+song);
+      URL myUrl = myFile.toURI().toURL();
+      AudioInputStream stream = AudioSystem.getAudioInputStream(myUrl);
+      AudioFormat format = stream.getFormat();
+      clip = AudioSystem.getClip();
+      clip.open(stream);
+      clip.start();
+    }
+    catch (UnsupportedAudioFileException e) {
+      e.printStackTrace();
+    }
+    catch (LineUnavailableException e) {
+      e.printStackTrace();
+    }
+    catch(Exception e){
+      System.out.println("Could not fetch Audio");
+      JOptionPane.showMessageDialog(null, e);
+
+    }
 
   }
 

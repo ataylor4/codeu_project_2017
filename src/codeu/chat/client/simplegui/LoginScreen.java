@@ -14,6 +14,9 @@ import java.net.URL;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import java.io.File;
+import java.awt.image.BufferedImage;
+import java.io.FileInputStream;
+import java.nio.file.*;
 
 import codeu.chat.client.ClientContext;
 import codeu.chat.common.ConversationSummary;
@@ -74,16 +77,29 @@ public final class LoginScreen extends JPanel{
         infoLabelC.gridx = 2;
         infoLabelC.gridy = 0;
         infoLabelC.anchor = GridBagConstraints.LINE_END;
+        infoLabel.setFont(new Font("Serif", Font.BOLD, 16));
 
         Image image =null;
+
         try {
+
+            //This reads URL when there is an internet connection
+            /*
             URL url=new URL("https://s-media-cache-ak0.pinimg.com/236x/fc/1c/f6/fc1cf66facb46e89d6ea15aa3d0b88e0.jpg");
             image = ImageIO.read(url);
-            //File sourceimage = new File("/Users/Kinini/Documents/Projects/git/codeu_project_2017/src/images/icon2.jpg");
-            //image = ImageIO.read(sourceimage);
+            */
+            //This reads icon from the local machine
+            /*
+            File sourceimage = new File("/Users/Kinini/Documents/Projects/git/codeu_project_2017/src/images/icon2.jpg");
+           */
+            System.out.println(System.getProperty("user.dir") +"/../res/images/icon5.jpg");
+            File sourceimage = new File(System.getProperty("user.dir") +"/../res/images/icon6.jpg");
+            image = ImageIO.read(sourceimage);
+
        }
         catch(IOException e){
-            e.printStackTrace();
+            System.out.println(System.getProperty("user.dir"));
+            System.out.println("The image was not loaded.");
         }
         final GridBagConstraints iconC = new GridBagConstraints();
         iconC.gridx = 2;
@@ -119,11 +135,6 @@ public final class LoginScreen extends JPanel{
         textFieldC.gridy=1;
         usernameC.anchor = GridBagConstraints.PAGE_START;
 
-//        final GridBagConstraints fieldsGapC = new GridBagConstraints();
-//        fieldsGapC.gridx = 0;
-//        fieldsGapC.gridy = 1;
-//        fieldsGapC.fill = GridBagConstraints.VERTICAL;
-//        fieldsGapC.weightx = 0.9;
 
         titlePanelC.gridx = 0;
         titlePanelC.gridy = 0;

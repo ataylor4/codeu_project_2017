@@ -108,6 +108,7 @@ public class Password {
     * This method coordinates user authentication via GUI
     * */
     public static boolean authenticateUserGUI(String user, String password){
+        if(ClientUser.usersByName.first(user)==null) return false;
         boolean isCorrect=false;
         try{
             isCorrect=verifyPassword(user, password, 0, ClientUser.usersByName.first(user));
