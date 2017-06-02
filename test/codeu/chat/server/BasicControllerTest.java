@@ -177,7 +177,7 @@ public final class BasicControllerTest {
             "Check that the message has a valid reference",
             message == null);
 
-    controller.removeMessage(message);
+    controller.removeMessage(message, conversation.id);
     assertFalse(view.findMessage(message.id) != null);
 
   }

@@ -117,12 +117,10 @@ public final class ClientConversation {
       System.out.format("Error: conversation \"%s\" does not exist\n", title);
       return;
     }
-
     boolean deletingCurrent = false;
     if (cs.equals(getCurrent())) {
       deletingCurrent = true;
     }
-
     controller.removeConversation(getConversation(cs.id));
     summariesByUuid.remove(cs.id);
     updateAllConversations(deletingCurrent ? true : false);
