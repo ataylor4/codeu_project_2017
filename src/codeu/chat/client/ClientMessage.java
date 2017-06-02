@@ -307,12 +307,12 @@ public final class ClientMessage {
     } else {
 
       // Display author name if available.  Otherwise display the author UUID.
-      final String authorName = (userContext == null) ? ClientUser.usersById.get(m.author).name : userContext.getName(m.author);
-      //String author= (authorName == null) ?  " Author: " : "Author: ["+ authorName +"]";
-      //String conv= "Conversation [" +conversation.title+"]";
-      //String created= "Created ["+ m.creation +"]\n";
-      //String info="Body [" + m.content +"]\n";
-      //sb.append(author).append(conv).append(created).append(info);
+      final String authorName = (userContext == null) ? null : userContext.getName(m.author);
+      String author= (authorName == null) ?  "Author[]" : "Author: ["+ authorName +"]  ";
+      String conv= "Conversation:  [" +conversation.title+"]   ";
+      String created= "Created  ["+ m.creation +"]\n";
+      String info="Body: [" + m.content +"]\n";
+      sb.append(author).append(conv).append(created).append(info);
       System.out.format(" Author: [%s]   Conversation:  [%s]  Created: [%s]\n   Body: %s\n",
               (authorName == null) ? "" : authorName, conversation.title,  m.creation, m.content);
     }
@@ -333,19 +333,19 @@ public final class ClientMessage {
     updateMessages(false);
     BTreeIterator<String, ConversationSummary> conversations = ClientConversation.summariesSortedByTitle.all().iterator();
     while(conversations.hasNext()) {
+      if(conversations.next()==null) break;
       ConversationSummary summary=conversations.next();
       updateMessages(summary, true);
       for (Message message : conversationContents) {
         if (message.content.toLowerCase().contains(words.toLowerCase())) {
           found = true;
-          //sb.append(printMessageFriendly(summary, message, null));
-          printMessageFriendly(summary, message, null);
+          sb.append(printMessageFriendly(summary, message, null));
         }
       }
     }
     if(!found){
-      //sb.append("phrase not found");
-      System.out.println("phrase not found");
+      sb.append("Message not found");
+      System.out.println("Message not found");
     }
     return sb.toString();
   }

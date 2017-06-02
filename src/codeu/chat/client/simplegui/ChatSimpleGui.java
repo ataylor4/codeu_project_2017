@@ -227,6 +227,7 @@ public final class ChatSimpleGui {
               mainViewPanel.add(searchPanel, searchPanelC);
 
               mainFrame.add(mainViewPanel);
+              mainFrame.pack();
             }
           }
         });
