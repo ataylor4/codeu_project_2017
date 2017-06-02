@@ -258,7 +258,7 @@ public class Password {
     /*
     * Uses regex to give feedback on password strength
     * */
-    public static final String passwordStrength(String password){
+    public static final String(String password){
 
         //a very strong password has special, lowercase, uppercase, digit characters, no whitespace and has length of at least 8
         if(password.matches("(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}")) return "Very Strong!";

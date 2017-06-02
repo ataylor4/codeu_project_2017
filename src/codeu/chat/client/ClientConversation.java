@@ -208,7 +208,6 @@ public final class ClientConversation {
       final String name = (userContext == null) ? null : userContext.getName(c.owner);
       final String ownerName = (name == null) ? "" : String.format(" %s", name);
       System.out.format(" Title: %s\n", c.title);
-      //System.out.format("    Id: %s owner: %s owner name: %s created %s\n", c.id, c.owner, c.creation);
       System.out.format("    Id: %s owner: %s%s created %s\n", c.id, c.owner, ownerName, c.creation);
     }
   }
