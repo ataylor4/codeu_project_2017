@@ -232,6 +232,10 @@ public final class ClientConversation {
   }
 
   public String searchConversation(String title){
+    if(title.equals("")){
+      System.out.println("Enter Conversation title");
+      return "Enter Conversation title";
+    }
     StringBuilder sb=new StringBuilder();
     ClientUser user = new ClientUser(controller, view);
     user.updateUsers();
