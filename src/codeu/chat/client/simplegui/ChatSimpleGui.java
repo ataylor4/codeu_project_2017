@@ -303,7 +303,7 @@ public final class ChatSimpleGui {
 
     messagesViewC.gridx = 0;
     messagesViewC.gridy = 1;
-    messagesViewC.gridwidth = 1;//2
+    messagesViewC.gridwidth = 1;
     messagesViewC.gridheight = 1;
     messagesViewC.fill = GridBagConstraints.BOTH;
     messagesViewC.weighty = 0.7;

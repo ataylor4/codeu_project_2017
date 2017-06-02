@@ -27,36 +27,36 @@ import codeu.chat.util.Logger;
 
 @SuppressWarnings("serial")
 public final class LoginScreen extends JPanel{
-    public JTextField textField;
-    public JPasswordField pwdField;
-    public JButton loginButton;
-    public JPanel panel;
-    public JButton signupButton;
-    public JLabel pwdLabel;
-    public JLabel username;
-    public JPanel buttonPanel;
-    public GridBagConstraints buttonPanelC;
+    protected JTextField textField;
+    protected JPasswordField pwdField;
+    protected JButton loginButton;
+    protected JPanel panel;
+    protected JButton signupButton;
+    protected JLabel pwdLabel;
+    protected JLabel username;
+    protected JPanel buttonPanel;
+    protected GridBagConstraints buttonPanelC;
 
-    public JPasswordField pwdConfirm;
-    public JLabel pwdConfirmLabel;
-    public GridBagConstraints pwdConfirmLabelC;
-    public GridBagConstraints pwdConfirmC;
+    protected JPasswordField pwdConfirm;
+    protected JLabel pwdConfirmLabel;
+    protected GridBagConstraints pwdConfirmLabelC;
+    protected GridBagConstraints pwdConfirmC;
 
-    public JLabel securityQnLabel;
-    public GridBagConstraints securityQnLabelC;
+    protected JLabel securityQnLabel;
+    protected GridBagConstraints securityQnLabelC;
 
-    public GridBagConstraints securityQnC;
+    protected GridBagConstraints securityQnC;
 
-    public JLabel securityAnswerLabel;
-    public GridBagConstraints securityAnswerLabelC;
+    protected JLabel securityAnswerLabel;
+    protected GridBagConstraints securityAnswerLabelC;
 
-    public JTextField securityAnswer;
-    public GridBagConstraints securityAnswerC;
+    protected JTextField securityAnswer;
+    protected GridBagConstraints securityAnswerC;
 
-    public JPanel titlePanel;
-    public JLabel infoLabel;
+    protected JPanel titlePanel;
+    protected JLabel infoLabel;
 
-    public LoginScreen() {
+    protected LoginScreen() {
         super(new GridBagLayout());
         initialize();
     }
@@ -190,7 +190,6 @@ public final class LoginScreen extends JPanel{
         securityAnswerC.gridy=5;
         securityAnswerC.anchor = GridBagConstraints.PAGE_END;
 
-
         buttonPanel = new JPanel();
         buttonPanelC=new GridBagConstraints();
         buttonPanelC.gridx=1;
@@ -211,7 +210,6 @@ public final class LoginScreen extends JPanel{
         panel.add(pwdField, pwdFieldC);
         panel.add(buttonPanel, buttonPanelC);
         panel.setBackground(Color.GREEN);
-        //panel.setOpaque(false);
 
         panelC.gridx = 0;
         panelC.gridy = 0;
