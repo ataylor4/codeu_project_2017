@@ -12,9 +12,11 @@ public class BTreeStore<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
     public static final int NUM_POINTERS = 2;
 
     private static final Logger.Log LOG = Logger.newLog(BTreeStore.class);
-    private static final int INSERTION = 1;
-    private static final int DELETION = 2;
-    private static final int UPDATE = 3;
+    public static final int INSERTION = 1;
+    public static final int DELETION = 2;
+    public static final int UPDATE = 3;
+    public static final int SUCCESS = 4;
+    public static final int ABORT = 5;
 
     private BTreeStore<KEY, VALUE> parent;
     private Object[] children;
@@ -72,14 +74,23 @@ public class BTreeStore<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
                 if (read == INSERTION) {
                     KEY key = treeInformation.keySerializer.read(inputStream);
                     VALUE value = treeInformation.valueSerializer.read(inputStream);
-                    root = root.insert(key, value, false, false);
+                    int success = inputStream.read();
+                    if (success == SUCCESS) {
+                        root = root.insert(key, value, false, false);
+                    }
                 } else if (read == DELETION) {
                     KEY key = treeInformation.keySerializer.read(inputStream);
-                    root = root.delete(key, false);
+                    int success = inputStream.read();
+                    if (success == SUCCESS) {
+                        root = root.delete(key, false);
+                    }
                 } else if (read == UPDATE) {
                     KEY key = treeInformation.keySerializer.read(inputStream);
                     VALUE value = treeInformation.valueSerializer.read(inputStream);
-                    root.modify(key, value);
+                    int success = inputStream.read();
+                    if (success == SUCCESS) {
+                        root.modify(key, value);
+                    }
                 }
             }
             deepCopy(root);
@@ -128,18 +139,29 @@ public class BTreeStore<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
      */
     @Override
     public boolean update(KEY key, VALUE value) {
-        if (modify(key, value)) {
-            try (FileOutputStream outputStream = new FileOutputStream(treeInformation.file, true)) {
-                outputStream.write(UPDATE);
-                treeInformation.keySerializer.write(outputStream, key);
-                treeInformation.valueSerializer.write(outputStream, value);
+        try (FileOutputStream outputStream = new FileOutputStream(treeInformation.file, true)) {
+            outputStream.write(UPDATE);
+            treeInformation.keySerializer.write(outputStream, key);
+            treeInformation.valueSerializer.write(outputStream, value);
+            if (modify(key, value)) {
+                outputStream.write(SUCCESS);
                 outputStream.flush();
-            } catch (IOException e) {
-                LOG.error(e, "Error updating key and value");
+                return true;
+            } else {
+                outputStream.write(ABORT);
+                outputStream.flush();
+                return false;
             }
-            return true;
+        } catch (IOException e) {
+            LOG.error(e, "Error updating key and value");
+            try (FileOutputStream outputStream = new FileOutputStream(treeInformation.file, true)) {
+                outputStream.write(ABORT);
+                outputStream.flush();
+            } catch (IOException e1) {
+                LOG.error(e1, "error writing abort to file for update.", treeInformation.file);
+            }
         }
-        return false;
+        return true;
     }
 
     private boolean modify(KEY key, VALUE value) {
@@ -221,28 +243,41 @@ public class BTreeStore<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
     }
 
     private BTreeStore<KEY, VALUE> insert(KEY key, VALUE value, boolean allowDuplicates, boolean writeToFile) {
-        BTreeStore<KEY, VALUE> curr = this;
-        while (true) {
-            int index = curr.getNext(key, curr.numElems);
-            if (!allowDuplicates && index < curr.numElems && key.equals(curr.keys[index])) {
-                return this;
+        try (FileOutputStream outputStream = new FileOutputStream(treeInformation.file, true)) {
+            if (writeToFile) {
+                outputStream.write(INSERTION);
+                treeInformation.keySerializer.write(outputStream, key);
+                treeInformation.valueSerializer.write(outputStream, value);
+                outputStream.flush();
             }
-            if (curr.children[index] == null) {
-                //first call, prev's value doesn't matter
-                BTreeStore<KEY, VALUE> newRoot = insertIntoNode(curr, key, value, null, curr);
-                if (writeToFile) {
-                    try (FileOutputStream outputStream = new FileOutputStream(treeInformation.file, true)) {
-                        outputStream.write(INSERTION);
-                        treeInformation.keySerializer.write(outputStream, key);
-                        treeInformation.valueSerializer.write(outputStream, value);
-                        outputStream.flush();
-                    } catch (IOException e) {
-                        LOG.error(e, "Error writing to file on insertion.", key, treeInformation.file);
-                    }
+            BTreeStore<KEY, VALUE> curr = this;
+            while (true) {
+                int index = curr.getNext(key, curr.numElems);
+                if (!allowDuplicates && index < curr.numElems && key.equals(curr.keys[index])) {
+                    return this;
                 }
-                return newRoot == null ? this : newRoot;
+                if (curr.children[index] == null) {
+                    //first call, prev's value doesn't matter
+                    BTreeStore<KEY, VALUE> newRoot = insertIntoNode(curr, key, value, null, curr);
+                    if (writeToFile) {
+                        outputStream.write(SUCCESS);
+                    }
+                    outputStream.flush();
+                    return newRoot == null ? this : newRoot;
+                }
+                curr = (BTreeStore<KEY, VALUE>) curr.children[index];
             }
-            curr = (BTreeStore<KEY, VALUE>) curr.children[index];
+        } catch (IOException e) {
+            LOG.error(e, "Error writing to file on insertion.", key, treeInformation.file);
+            if (writeToFile) {
+                try (FileOutputStream outputStream = new FileOutputStream(treeInformation.file, true)) {
+                    outputStream.write(ABORT);
+                    outputStream.flush();
+                } catch (IOException e1) {
+                    LOG.error(e1, "Error writing to file for abort in insert.", treeInformation.file);
+                }
+            }
+            return this;
         }
     }
 
@@ -259,24 +294,42 @@ public class BTreeStore<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
     }
 
     private BTreeStore<KEY, VALUE> delete(KEY elem, boolean writeToFile) {
-        BTreeIterator<KEY, VALUE> toDelete = at(elem).iterator();
-        BTreeStore<KEY, VALUE> result = this;
-        if (toDelete.hasNext()) {
-            result = removeFromTree(toDelete.curr, toDelete.index);
+        try (FileOutputStream outputStream = new FileOutputStream(treeInformation.file, true)) {
             if (writeToFile) {
-                try (FileOutputStream outputStream = new FileOutputStream(treeInformation.file, true)) {
-                    outputStream.write(DELETION);
-                    treeInformation.keySerializer.write(outputStream, elem);
+                outputStream.write(DELETION);
+                treeInformation.keySerializer.write(outputStream, elem);
+                outputStream.flush();
+            }
+            BTreeIterator<KEY, VALUE> toDelete = at(elem).iterator();
+            BTreeStore<KEY, VALUE> result = this;
+            if (toDelete.hasNext()) {
+                result = removeFromTree(toDelete.curr, toDelete.index);
+                if (result == null) {
+                    result = this;
+                }
+                if (writeToFile) {
+                    outputStream.write(SUCCESS);
                     outputStream.flush();
-                } catch (IOException e) {
-                    LOG.error(e, "Error writing to file on deletion.", elem, treeInformation.file);
+                }
+            } else {
+                if (writeToFile) {
+                    outputStream.write(ABORT);
+                    outputStream.flush();
                 }
             }
-            if (result == null) {
-                result = this;
+            return result;
+        } catch (IOException e) {
+            LOG.error("Error writing to file on deletion.", elem, treeInformation.file);
+            if (writeToFile) {
+                try (FileOutputStream outputStream = new FileOutputStream(treeInformation.file, true)) {
+                    outputStream.write(ABORT);
+                    outputStream.flush();
+                } catch (IOException e1) {
+                    LOG.error(e1, "Error writing to file for abort in delete.", treeInformation.file);
+                }
             }
+            return this;
         }
-        return result;
     }
 
     /**
