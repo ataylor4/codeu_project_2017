@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.lang.StringBuilder;
 
 import codeu.chat.common.User;
 import codeu.chat.client.ClientConversation;
@@ -49,8 +50,8 @@ public final class ClientUser {
 
   // This is the set of users known to the server, sorted by name.
   public static BTreeStore<String, User> usersByName
-      = new BTreeStore<>(BTreeStore.NUM_POINTERS, String.CASE_INSENSITIVE_ORDER, Serializers.STRING, User.SERIALIZER,
-      STORE_FILENAME);
+          = new BTreeStore<>(BTreeStore.NUM_POINTERS, String.CASE_INSENSITIVE_ORDER, Serializers.STRING, User.SERIALIZER,
+          STORE_FILENAME);
 
   public ClientUser(Controller controller, View view) {
     this.controller = controller;
@@ -181,21 +182,32 @@ public final class ClientUser {
     System.out.println(getUserInfoString(user));
   }
 
-  public  void searchUser(String name){
+  public  String searchUser(String name){
     updateUsers();
+    if(name.equals("")) {
+      System.out.println("Enter name to search");
+      return "Enter name to search";
+    }
+
+    StringBuilder sb=new StringBuilder();
     User user=usersByName.first(name);
-    if(user==null) System.out.format("%s does not exist \n", name);
+    if(user==null) {
+      System.out.format("%s does not exist \n", name);
+      sb.append(name+ " does not exist\n");
+    }
     else{
       System.out.println(getUserInfoString(user));
       System.out.println("Conversations:");
+      sb.append("Conversations for ["+name+"]:\n");
       ClientConversation conversation=new ClientConversation(controller, view, null);//not the best implementation
       conversation.updateAllConversations(false);
       BTreeIterator<String, ConversationSummary> conversations = ClientConversation.summariesSortedByTitle.all().iterator();
       while(conversations.hasNext()){
         ConversationSummary summary=conversations.next();
-        if(Uuids.equals(summary.owner, user.id)) ClientConversation.printConversationFriendly(summary);
+        if(Uuids.equals(summary.owner, user.id))  sb.append(ClientConversation.printConversationFriendly(summary));
       }
     }
+    return sb.toString();
   }
 }
 
