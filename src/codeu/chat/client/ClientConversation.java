@@ -205,12 +205,14 @@ public final class ClientConversation {
     if (c == null) {
       System.out.println("Null conversation");
     } else {
-      final String name = (userContext == null) ? ClientUser.usersById.get(c.owner).name : userContext.getName(c.owner);
+      final String name = (userContext == null) ? null : userContext.getName(c.owner);
       final String ownerName = (name == null) ? "" : String.format(" %s", name);
       System.out.format(" Title: %s\n", c.title);
-      System.out.format("    Id: %s owner: %s owner name: %s created %s\n", c.id, c.owner, c.creation);
+      //System.out.format("    Id: %s owner: %s owner name: %s created %s\n", c.id, c.owner, c.creation);
+      System.out.format("    Id: %s owner: %s%s created %s\n", c.id, c.owner, ownerName, c.creation);
     }
   }
+
 
   public static void printConversationFriendly(ConversationSummary c) {
     if (c == null) {
@@ -222,6 +224,7 @@ public final class ClientConversation {
       System.out.format("    Id: %s Owner:[%s]  created [%s]\n", c.id, ownerName, c.creation);
     }
   }
+
   // Print Conversation outside of User context.
   public static void printConversation(ConversationSummary c) {
     printConversation(c, null);
@@ -243,3 +246,4 @@ public final class ClientConversation {
     if(!found) System.out.println("Conversation not found");
   }
 }
+
