@@ -19,10 +19,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.*;
 
+
 import codeu.chat.client.ClientContext;
 import codeu.chat.common.ConversationSummary;
 import codeu.chat.common.Message;
 import codeu.chat.common.User;
+import codeu.chat.client.simplegui.ChatSimpleGui;
 
 // NOTE: JPanel is serializable, but there is no need to serialize MessagePanel
 // without the @SuppressWarnings, the compiler will complain of no override for serialVersionUID
@@ -46,13 +48,13 @@ public final class MessagePanel extends JPanel {
   public void update(ConversationSummary owningConversation) {
 
     final User u = (owningConversation == null) ?
-        null :
-        clientContext.user.lookup(owningConversation.owner);
+            null :
+            clientContext.user.lookup(owningConversation.owner);
 
     messageOwnerLabel.setText("Owner: " +
-        ((u==null) ?
-            ((owningConversation==null) ? "" : owningConversation.owner) :
-            u.name));
+            ((u==null) ?
+                    ((owningConversation==null) ? "" : owningConversation.owner) :
+                    u.name));
 
     messageConversationLabel.setText("Conversation: " +
             ((owningConversation==null) ? "" : owningConversation.title));
@@ -158,14 +160,15 @@ public final class MessagePanel extends JPanel {
           JOptionPane.showMessageDialog(MessagePanel.this, "You must select a conversation.");
         } else {
           final String messageText = (String) JOptionPane.showInputDialog(
-              MessagePanel.this, "Enter message:", "Add Message", JOptionPane.PLAIN_MESSAGE,
-              null, null, "");
+                  MessagePanel.this, "Enter message:", "Add Message", JOptionPane.PLAIN_MESSAGE,
+                  null, null, "");
           if (messageText != null && messageText.length() > 0) {
             clientContext.message.addMessage(
-                clientContext.user.getCurrent().id,
-                clientContext.conversation.getCurrentId(),
-                messageText);
+                    clientContext.user.getCurrent().id,
+                    clientContext.conversation.getCurrentId(),
+                    messageText);
             MessagePanel.this.getAllMessages(clientContext.conversation.getCurrent());
+            ChatSimpleGui.playSound("message.wav");
           }
         }
       }
@@ -185,8 +188,8 @@ public final class MessagePanel extends JPanel {
         } else {
           Message requestedDeletion = clientContext.message.getConversationContents(clientContext.conversation.getCurrent()).get(userList.getSelectedIndex());
           if (!requestedDeletion.author.equals(clientContext.user.getCurrent().id)) {
-              JOptionPane.showMessageDialog(MessagePanel.this, "Error: must be author of message to remove!", "Error", JOptionPane.ERROR_MESSAGE);
-              return;
+            JOptionPane.showMessageDialog(MessagePanel.this, "Error: must be author of message to remove!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
           }
           final String data = Integer.toString(userList.getSelectedIndex());
           clientContext.message.removeMessage(data);
@@ -209,7 +212,7 @@ public final class MessagePanel extends JPanel {
       final String authorName = clientContext.user.getName(m.author);
 
       final String displayString = String.format("%s: [%s]: %s",
-          ((authorName == null) ? m.author : authorName), m.creation, m.content);
+              ((authorName == null) ? m.author : authorName), m.creation, m.content);
 
       messageListModel.addElement(displayString);
     }

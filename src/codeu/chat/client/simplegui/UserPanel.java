@@ -35,6 +35,7 @@ import codeu.chat.common.User;
 public final class UserPanel extends JPanel {
 
     private final ClientContext clientContext;
+    public JLabel userSignedInLabel;
 
     public UserPanel(ClientContext clientContext) {
         super(new GridBagLayout());
@@ -63,7 +64,7 @@ public final class UserPanel extends JPanel {
         titleGapC.fill = GridBagConstraints.HORIZONTAL;
         titleGapC.weightx = 0.9;
 
-        final JLabel userSignedInLabel = new JLabel("not signed in", JLabel.RIGHT);
+        userSignedInLabel = new JLabel("not signed in", JLabel.RIGHT);
         final GridBagConstraints titleUserC = new GridBagConstraints();
         titleUserC.gridx = 2;
         titleUserC.gridy = 0;
@@ -149,6 +150,7 @@ public final class UserPanel extends JPanel {
         this.add(buttonPanel, buttonPanelC);
         this.add(currentPanel, currentPanelC);
 
+
         userUpdateButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -232,7 +234,7 @@ public final class UserPanel extends JPanel {
         userRemoveButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-               if (!clientContext.user.hasCurrent()) {
+                if (!clientContext.user.hasCurrent()) {
                     JOptionPane.showMessageDialog(UserPanel.this, "Error: must be signed in to remove user!", "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
@@ -397,7 +399,7 @@ public final class UserPanel extends JPanel {
             String[] securityDetails=ClientUser.usersByName.first(data).security.split("\\$");
             if (securityDetails[3].equals(securityQuestion)){//questions match
                 if(Password.passedsecurityTestGUI(data, answer)) {
-                   // ClientContext.user.removeUser(data);
+                    // ClientContext.user.removeUser(data);
                     createPasswordInputDialog(listModel, 1);
                     JOptionPane.showMessageDialog(panel, "Password Successfully Changed!", "PASSWORD STRENGTH", JOptionPane.INFORMATION_MESSAGE);
                 }

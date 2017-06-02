@@ -47,28 +47,28 @@ public class Password {
             }
         }
     }
-/*
-* this method calls methods to encrypt the password and the security question answer
-* it stores all the encrypted security question in a string separated by $
-* securityDetails[0]=password
-* securityDetails[1]=security question
-* securityDetails[2]=security question answer
-* */
+    /*
+    * this method calls methods to encrypt the password and the security question answer
+    * it stores all the encrypted security question in a string separated by $
+    * securityDetails[0]=password
+    * securityDetails[1]=security question
+    * securityDetails[2]=security question answer
+    * */
     public static String createPassword(String user, String password){
-            try {
-                String[] securityDetails=password.split("\\$");
-                String encryptedPass=encryptPassword(user, securityDetails[0], getSaltvalue());
-                String encryptedAnswer=encryptPassword(user, securityDetails[2], getSaltvalue());
-                String loginDetails=encryptedPass+"$" + securityDetails[1] +"$" +encryptedAnswer;
+        try {
+            String[] securityDetails=password.split("\\$");
+            String encryptedPass=encryptPassword(user, securityDetails[0], getSaltvalue());
+            String encryptedAnswer=encryptPassword(user, securityDetails[2], getSaltvalue());
+            String loginDetails=encryptedPass+"$" + securityDetails[1] +"$" +encryptedAnswer;
 
-                return loginDetails;
+            return loginDetails;
 
-            } catch (NoSuchAlgorithmException e) {
-                System.out.println(e.getMessage());
-            } catch (InvalidKeySpecException e) {
-                System.out.println(e.getMessage());
-            }
-            return null;
+        } catch (NoSuchAlgorithmException e) {
+            System.out.println(e.getMessage());
+        } catch (InvalidKeySpecException e) {
+            System.out.println(e.getMessage());
+        }
+        return null;
     }
 
 /*
@@ -108,6 +108,7 @@ public class Password {
     * This method coordinates user authentication via GUI
     * */
     public static boolean authenticateUserGUI(String user, String password){
+        if(ClientUser.usersByName.first(user)==null) return false;
         boolean isCorrect=false;
         try{
             isCorrect=verifyPassword(user, password, 0, ClientUser.usersByName.first(user));
@@ -161,9 +162,9 @@ public class Password {
         }
     }
 
-  /*
-  * this is a GUI helper method to validate the correctness of the security question answer so as to be able to change the password on GUI
-  * */
+    /*
+    * this is a GUI helper method to validate the correctness of the security question answer so as to be able to change the password on GUI
+    * */
     public static boolean passedsecurityTestGUI(String name, String answer){
         boolean passed=false;
         try{
@@ -183,9 +184,9 @@ public class Password {
     * */
     public static final boolean verifyPassword(String username, String password, int code, User user)throws NoSuchAlgorithmException, InvalidKeySpecException{
         String[] stored_pass=user.security.split("\\$");
-            int iterations = Integer.parseInt(stored_pass[0]);
-            byte[] salt = convertToBytes(stored_pass[1]);
-            byte[] hash = convertToBytes(stored_pass[2]);
+        int iterations = Integer.parseInt(stored_pass[0]);
+        byte[] salt = convertToBytes(stored_pass[1]);
+        byte[] hash = convertToBytes(stored_pass[2]);
 
         if(code==1){//decrypting security question
             iterations=Integer.parseInt(stored_pass[4]);
@@ -214,10 +215,10 @@ public class Password {
         return encrypted_pass;
     }
 
-/*
-* this method hashes the password using the SHA 256 algorithm .
-* It returns the encoded salted password in bytes
-* */
+    /*
+    * this method hashes the password using the SHA 256 algorithm .
+    * It returns the encoded salted password in bytes
+    * */
     private static final byte[] hash(String password, byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException {
 
         PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), salt, ITERATIONS, DESIRED_KEYLEN);
@@ -227,10 +228,10 @@ public class Password {
         byte[] hash = key.getEncoded();
         return hash;
     }
-/*
-*
-* returns a randomized secure salt value to solve the problem of similar passwords
-* */
+    /*
+    *
+    * returns a randomized secure salt value to solve the problem of similar passwords
+    * */
     private static final byte[] getSaltvalue() throws NoSuchAlgorithmException {
         byte[] salt = new byte[SALT_LENGTH];
         SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
@@ -271,12 +272,11 @@ public class Password {
 
         //the rest are weak passwords
         return "Weak!";
-        }
+    }
 
-
-        /*
-        * Interacts with user to collect password recovery information
-        * */
+    /*
+    * Interacts with user to collect password recovery information
+    * */
     public static final String collectPasswordRecoveryInfo(String name){
         int choice=0;
 

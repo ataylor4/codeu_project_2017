@@ -17,6 +17,7 @@ package codeu.chat.client;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.lang.StringBuilder;
 
 import codeu.chat.common.Conversation;
 import codeu.chat.common.ConversationSummary;
@@ -48,8 +49,8 @@ public final class ClientConversation {
   // This is the set of conversations known to the server, sorted by title.
 
   public static BTreeStore<String, ConversationSummary> summariesSortedByTitle =
-      new BTreeStore<>(BTreeStore.NUM_POINTERS, String.CASE_INSENSITIVE_ORDER,
-          Serializers.STRING, ConversationSummary.SERIALIZER, STORE_FILENAME);
+          new BTreeStore<>(BTreeStore.NUM_POINTERS, String.CASE_INSENSITIVE_ORDER,
+                  Serializers.STRING, ConversationSummary.SERIALIZER, STORE_FILENAME);
 
   public ClientConversation(Controller controller, View view, ClientUser userContext) {
     this.controller = controller;
@@ -99,7 +100,7 @@ public final class ClientConversation {
 
     if (conv == null) {
       System.out.format("Error: conversation not created - %s.\n",
-          (validInputs) ? "server failure" : "bad input value");
+              (validInputs) ? "server failure" : "bad input value");
     } else {
       LOG.info("New conversation: Title= \"%s\" UUID= %s", conv.title, conv.id);
 
@@ -162,17 +163,17 @@ public final class ClientConversation {
       currentConversation = getConversation(currentSummary.id);
       if (currentConversation == null) {
         LOG.info("GetConversation: current=%s, current.id=%s, but currentConversation == null",
-            currentSummary, currentSummary.id);
+                currentSummary, currentSummary.id);
       } else {
         LOG.info("Get Conversation: Title=\"%s\" UUID=%s first=%s last=%s\n",
-            currentConversation.title, currentConversation.id, currentConversation.firstMessage,
-            currentConversation.lastMessage);
+                currentConversation.title, currentConversation.id, currentConversation.firstMessage,
+                currentConversation.lastMessage);
       }
     }
   }
 
   public int conversationsCount() {
-   return summariesByUuid.size();
+    return summariesByUuid.size();
   }
 
   public Iterable<ConversationSummary> getConversationSummaries() {
@@ -210,22 +211,28 @@ public final class ClientConversation {
     }
   }
 
-  public static void printConversationFriendly(ConversationSummary c) {
+  public static String printConversationFriendly(ConversationSummary c) {
+    StringBuilder sb = new StringBuilder();
     if (c == null) {
+      sb.append("Null conversation");
       System.out.println("Null conversation");
     } else {
       final String name = ClientUser.usersById.get(c.owner).name;
       final String ownerName = String.format("%s", name);
       System.out.format(" Title: %s\n", c.title);
       System.out.format("    Id: %s Owner:[%s]  created [%s]\n", c.id, ownerName, c.creation);
+
+      sb.append(" Title: [" +c.title +"]\n" + "Id :" +c.id +"Owner: ["+ownerName+"]  "+"Created ["+c.creation +"]\n");
     }
+    return sb.toString();
   }
   // Print Conversation outside of User context.
   public static void printConversation(ConversationSummary c) {
     printConversation(c, null);
   }
 
-  public  void searchConversation(String title){
+  public String searchConversation(String title){
+    StringBuilder sb=new StringBuilder();
     ClientUser user = new ClientUser(controller, view);
     user.updateUsers();
     updateAllConversations(false);
@@ -234,10 +241,14 @@ public final class ClientConversation {
     while(conversations.hasNext()){
       ConversationSummary summary=conversations.next();
       if(title.equalsIgnoreCase(summary.title)) {
-        ClientConversation.printConversationFriendly(summary);
+        sb.append(ClientConversation.printConversationFriendly(summary));
         found=true;
       }
     }
-    if(!found) System.out.println("Conversation not found");
+    if(!found) {
+      sb.append("Conversation not found");
+      System.out.println(sb.toString());
+    }
+    return sb.toString();
   }
 }

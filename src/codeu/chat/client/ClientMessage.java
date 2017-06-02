@@ -107,7 +107,7 @@ public final class ClientMessage {
 
     if (message == null) {
       System.out.format("Error: message not created - %s.\n",
-          (validInputs) ? "server error" : "bad input value");
+              (validInputs) ? "server error" : "bad input value");
     } else {
       LOG.info("New message:, Author= %s UUID= %s", author, message.id);
       current = message;
@@ -214,7 +214,7 @@ public final class ClientMessage {
       // Fetch/refetch all the messages.
       conversationContents.clear();
       LOG.info("Refetch all messages: replaceAll=%s firstMessage=%s", replaceAll,
-               conversationHead.firstMessage);
+              conversationHead.firstMessage);
       return conversationHead.firstMessage;
     } else {
       // Locate last known message. Its next, if any, becomes our starting point.
@@ -256,8 +256,8 @@ public final class ClientMessage {
       LOG.info("ConversationHead is null");
     } else {
       LOG.info("ConversationHead: Title=\"%s\" UUID=%s first=%s last=%s\n",
-          conversationHead.title, conversationHead.id, conversationHead.firstMessage,
-          conversationHead.lastMessage);
+              conversationHead.title, conversationHead.id, conversationHead.firstMessage,
+              conversationHead.lastMessage);
 
       Uuid nextMessageId = getCurrentMessageFetchId(replaceAll);
 
@@ -278,7 +278,7 @@ public final class ClientMessage {
         nextMessageId = conversationContents.get(conversationContents.size() - 1).next;
       }
       LOG.info("Retrieved %d messages for conversation %s (%s).\n",
-          conversationContents.size(), conversationHead.id, conversationHead.title);
+              conversationContents.size(), conversationHead.id, conversationHead.title);
 
       // Set current to first message of conversation.
       current = (conversationContents.size() > 0) ? conversationContents.get(0) : null;
@@ -295,28 +295,36 @@ public final class ClientMessage {
       final String authorName = (userContext == null) ? null : userContext.getName(m.author);
 
       System.out.format(" Author: %s   Id: %s created: %s\n   Body: %s\n",
-          (authorName == null) ? m.author : authorName, m.id, m.creation, m.content);
+              (authorName == null) ? m.author : authorName, m.id, m.creation, m.content);
     }
   }
 
-  public static void printMessageFriendly(ConversationSummary conversation, Message m, ClientUser userContext) {
+  public static String printMessageFriendly(ConversationSummary conversation, Message m, ClientUser userContext) {
+    StringBuilder sb=new StringBuilder("");
     if (m == null) {
       System.out.println("Null message.");
+      sb.append( "Null message.\n");
     } else {
 
       // Display author name if available.  Otherwise display the author UUID.
       final String authorName = (userContext == null) ? ClientUser.usersById.get(m.author).name : userContext.getName(m.author);
-
+      //String author= (authorName == null) ?  " Author: " : "Author: ["+ authorName +"]";
+      //String conv= "Conversation [" +conversation.title+"]";
+      //String created= "Created ["+ m.creation +"]\n";
+      //String info="Body [" + m.content +"]\n";
+      //sb.append(author).append(conv).append(created).append(info);
       System.out.format(" Author: [%s]   Conversation:  [%s]  Created: [%s]\n   Body: %s\n",
               (authorName == null) ? "" : authorName, conversation.title,  m.creation, m.content);
     }
+    return  sb.toString();
   }
   // Print Message outside of user context.
   public static void printMessage(Message m) {
     printMessage(m, null);
   }
 
-  public void searchMessage(String words){
+  public String searchMessage(String words){
+    StringBuilder sb=new StringBuilder("");
     boolean found=false;
     ClientUser user = new ClientUser(controller, view);
     user.updateUsers();
@@ -330,10 +338,15 @@ public final class ClientMessage {
       for (Message message : conversationContents) {
         if (message.content.toLowerCase().contains(words.toLowerCase())) {
           found = true;
+          //sb.append(printMessageFriendly(summary, message, null));
           printMessageFriendly(summary, message, null);
         }
       }
     }
-      if(!found) System.out.println("phrase not found");
+    if(!found){
+      //sb.append("phrase not found");
+      System.out.println("phrase not found");
+    }
+    return sb.toString();
   }
 }
