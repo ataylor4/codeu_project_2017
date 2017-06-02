@@ -242,7 +242,6 @@ public final class ClientMessage {
   public void updateMessages(boolean replaceAll) {
     updateMessages(conversationContext.getCurrent(), replaceAll);
   }
-
   // Update the list of messages for the given conversation.
   // Currently rereads the entire message chain.
   public void updateMessages(ConversationSummary conversation, boolean replaceAll) {
@@ -258,16 +257,13 @@ public final class ClientMessage {
       LOG.info("ConversationHead: Title=\"%s\" UUID=%s first=%s last=%s\n",
               conversationHead.title, conversationHead.id, conversationHead.firstMessage,
               conversationHead.lastMessage);
-
       Uuid nextMessageId = getCurrentMessageFetchId(replaceAll);
 
       //  Stay in loop until all messages read (up to safety limit)
       while (!nextMessageId.equals(Uuids.NULL) && conversationContents.size() < MESSAGE_MAX_COUNT) {
 
         for (final Message msg : view.getMessages(nextMessageId, MESSAGE_FETCH_COUNT)) {
-
           conversationContents.add(msg);
-
           // Race: message possibly added since conversation fetched.  If that occurs,
           // pretend the newer messages do not exist - they'll get picked up next time).
           if (msg.next.equals(Uuids.NULL) || msg.id.equals(conversationHead.lastMessage)) {
@@ -279,7 +275,6 @@ public final class ClientMessage {
       }
       LOG.info("Retrieved %d messages for conversation %s (%s).\n",
               conversationContents.size(), conversationHead.id, conversationHead.title);
-
       // Set current to first message of conversation.
       current = (conversationContents.size() > 0) ? conversationContents.get(0) : null;
     }
@@ -325,6 +320,10 @@ public final class ClientMessage {
 
   public String searchMessage(String words){
     StringBuilder sb=new StringBuilder("");
+    if(words.equals("")) {
+      System.out.println("Enter text to search");
+      return "Enter text to search";
+    }
     boolean found=false;
     ClientUser user = new ClientUser(controller, view);
     user.updateUsers();
@@ -344,7 +343,7 @@ public final class ClientMessage {
       }
     }
     if(!found){
-      sb.append("Message not found");
+      sb.append("Message notfound");
       System.out.println("Message not found");
     }
     return sb.toString();

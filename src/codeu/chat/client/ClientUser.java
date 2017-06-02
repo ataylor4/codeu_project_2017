@@ -184,6 +184,11 @@ public final class ClientUser {
 
   public  String searchUser(String name){
     updateUsers();
+    if(name.equals("")) {
+      System.out.println("Enter name to search");
+      return "Enter name to search";
+    }
+
     StringBuilder sb=new StringBuilder();
     User user=usersByName.first(name);
     if(user==null) {
