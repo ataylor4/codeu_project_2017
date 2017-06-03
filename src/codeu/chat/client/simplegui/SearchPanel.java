@@ -26,18 +26,17 @@ public final class SearchPanel extends JPanel{
     }
 
     private void initialize(){
-        final JPanel panel = new JPanel(new GridBagLayout());
-        final GridBagConstraints panelC = new GridBagConstraints();
 
         final JLabel titleLabel = new JLabel("Enter to Search", JLabel.LEFT);
         final GridBagConstraints titleLabelC = new GridBagConstraints();
 
+        final JPanel currentPanel = new JPanel();
+        final GridBagConstraints currentPanelC = new GridBagConstraints();
 
         final JTextArea infoPanel = new JTextArea();
-        //infoPanel.setBounds(200,200,400,300);
         final JScrollPane infoScrollPane = new JScrollPane(infoPanel);
+        currentPanel.add(infoScrollPane);
         infoScrollPane.setPreferredSize(new Dimension(450, 250));
-        final GridBagConstraints infoScrollPaneC = new GridBagConstraints();
 
         final JTextField query=new JTextField("");
         query.setColumns(16);
@@ -57,26 +56,24 @@ public final class SearchPanel extends JPanel{
         titleLabelC.gridx = 0;
         titleLabelC.gridy = 0;
         titleLabelC.gridheight=1;
+        titleLabelC.fill = GridBagConstraints.HORIZONTAL;
         titleLabelC.anchor = GridBagConstraints.FIRST_LINE_START;
 
         queryC.gridx=1;
         queryC.gridy=0;
         queryC.gridwidth=10;
         queryC.gridheight=1;
+        queryC.fill = GridBagConstraints.HORIZONTAL;
         queryC.anchor=GridBagConstraints.PAGE_START;
 
-        infoScrollPaneC.gridx=0;
-        infoScrollPaneC.gridy=2;
-        infoScrollPaneC.gridwidth=7;
-        infoScrollPaneC.gridheight=3;
-        infoScrollPaneC.anchor = GridBagConstraints.LINE_START;
-
-        panelC.gridx = 0;
-        panelC.gridy = 9;
-        panelC.gridwidth = 6;
-        panelC.gridheight = 6;
-        panelC.fill = GridBagConstraints.HORIZONTAL;
-        panelC.anchor = GridBagConstraints.FIRST_LINE_START;
+        currentPanelC.gridx=0;
+        currentPanelC.gridy=2;
+        currentPanelC.gridwidth=7;
+        currentPanelC.gridheight=3;
+        currentPanelC.weightx=0.8;
+        currentPanelC.weighty=0.5;
+        currentPanelC.fill = GridBagConstraints.BOTH;
+        currentPanelC.anchor = GridBagConstraints.FIRST_LINE_START;
 
         buttonPanelC.gridx = 1;
         buttonPanelC.gridy = 1;
@@ -85,12 +82,10 @@ public final class SearchPanel extends JPanel{
         buttonPanelC.fill = GridBagConstraints.HORIZONTAL;
         buttonPanelC.anchor = GridBagConstraints.PAGE_END;
 
-        panel.add(query, queryC);
-        panel.add(titleLabel, titleLabelC);
-        panel.add(buttonPanel, buttonPanelC);
-        panel.add(infoScrollPane, infoScrollPaneC);
-
-        this.add(panel, panelC);
+        this.add(query, queryC);
+        this.add(titleLabel, titleLabelC);
+        this.add(buttonPanel, buttonPanelC);
+        this.add(currentPanel, currentPanelC);
 
         searchUser.addActionListener(new ActionListener(){
             @Override

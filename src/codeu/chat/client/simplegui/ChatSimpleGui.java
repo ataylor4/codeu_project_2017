@@ -312,6 +312,8 @@ public final class ChatSimpleGui {
     searchPanelC.gridy=1;
     searchPanelC.gridwidth=1;
     searchPanelC.gridheight=1;
+    searchPanelC.weightx = 0.3;
+    searchPanelC.weighty = 0.3;
     searchPanelC.fill = GridBagConstraints.BOTH;
     searchPanelC.weighty = 0.3;
 
