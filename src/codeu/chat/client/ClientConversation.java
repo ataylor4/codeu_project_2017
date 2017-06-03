@@ -28,6 +28,8 @@ import codeu.chat.util.Method;
 import codeu.chat.util.Serializers;
 import codeu.chat.util.store.BTreeStore;
 import codeu.chat.util.store.BTreeIterator;
+import codeu.chat.common.User;
+
 
 public final class ClientConversation {
 
@@ -217,7 +219,8 @@ public final class ClientConversation {
       sb.append("Null conversation");
       System.out.println("Null conversation");
     } else {
-      final String name = ClientUser.usersById.get(c.owner).name;
+      User user=ClientUser.usersById.get(c.owner);
+      final String name = (user==null)? "Deleted" :user.name;
       final String ownerName = String.format("%s", name);
       System.out.format(" Title: %s\n", c.title);
       System.out.format("    Id: %s Owner:[%s]  created [%s]\n", c.id, ownerName, c.creation);
@@ -244,14 +247,15 @@ public final class ClientConversation {
     boolean found=false;
     while(conversations.hasNext()){
       ConversationSummary summary=conversations.next();
+      if(summary==null) break;
       if(title.equalsIgnoreCase(summary.title)) {
         sb.append(ClientConversation.printConversationFriendly(summary));
         found=true;
       }
     }
     if(!found) {
-      sb.append("Conversation not found");
       System.out.println(sb.toString());
+      return "Conversation not found";
     }
     return sb.toString();
   }

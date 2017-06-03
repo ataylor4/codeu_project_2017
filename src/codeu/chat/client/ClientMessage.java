@@ -271,7 +271,8 @@ public final class ClientMessage {
             break;
           }
         }
-        nextMessageId = conversationContents.get(conversationContents.size() - 1).next;
+         if(!conversationContents.isEmpty()) nextMessageId = conversationContents.get(conversationContents.size() - 1).next;
+        else break;
       }
       LOG.info("Retrieved %d messages for conversation %s (%s).\n",
               conversationContents.size(), conversationHead.id, conversationHead.title);
@@ -332,8 +333,8 @@ public final class ClientMessage {
     updateMessages(false);
     BTreeIterator<String, ConversationSummary> conversations = ClientConversation.summariesSortedByTitle.all().iterator();
     while(conversations.hasNext()) {
-      if(conversations.next()==null) break;
       ConversationSummary summary=conversations.next();
+      if(summary==null) break;
       updateMessages(summary, true);
       for (Message message : conversationContents) {
         if (message.content.toLowerCase().contains(words.toLowerCase())) {
